@@ -55,7 +55,7 @@ const CardFormEditSensor = () => {
       )
       .then(function (response) {
         console.log(response.status, response.data);
-        navigate("/sensor");
+        navigate("/all-sensor");
       })
       .catch(function (error) {
         console.log(error);

@@ -33,7 +33,10 @@ function App() {
             path="/form-edit-sensor/:sensorId"
             element={<CardFormEditSensor />}
           />
-          <Route path="/dashboard" element={<PermanentDrawerLeft />} />
+          <Route
+            path="/dashboard"
+            element={<PermanentDrawerLeft content={<TableSensor />} />}
+          />
           <Route
             path="/form-edit-organization"
             element={<CardFormEditOrganization />}

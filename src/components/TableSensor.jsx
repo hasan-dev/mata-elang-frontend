@@ -92,6 +92,24 @@ export default function TableSensor() {
                       variant="outlined"
                       color="error"
                       startIcon={<DeleteIcon />}
+                      onClick={() => {
+                        axios
+                          .delete(
+                            `http://127.0.0.1:8001/api/sensors/delete/${sensor.id}`,
+                            {
+                              headers: {
+                                Authorization: "Bearer " + accessToken,
+                              },
+                            }
+                          )
+                          .then(function (response) {
+                            console.log(response.status, response.data);
+                            navigate("/all-sensor");
+                          })
+                          .catch(function (error) {
+                            console.log(error);
+                          });
+                      }}
                     >
                       Delete
                     </Button>
