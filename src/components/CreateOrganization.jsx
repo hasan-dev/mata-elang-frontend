@@ -1,10 +1,10 @@
-import { Card, CardContent, TextField, Button, Divider } from "@mui/material";
+import { Card, CardContent, TextField, Button } from "@mui/material";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
-const CardFormEditOrganization = () => {
+const CreateOrganization = () => {
   const [dataOrganization, setDataOrganization] = useState({
     name: "",
     email: "",
@@ -39,7 +39,7 @@ const CardFormEditOrganization = () => {
 
     axios
       .post(
-        "http://127.0.0.1:8001/api/organizations/create",
+        "http://127.0.0.1:8001/api/Organizations/create",
         dataOrganizationSubmit,
         {
           headers: {
@@ -56,36 +56,8 @@ const CardFormEditOrganization = () => {
       });
   };
 
-  useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8001/api/organizations/6", {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
-      .then(function (response) {
-        console.log(response.data.data);
-        if (!accessToken) {
-          // Jika access_token tidak ada, kembalikan ke halaman login
-          navigate("/login");
-        }
-        setDataOrganization(response.data.data);
-        // console.log(assetData);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  }, []);
-
-  useEffect(() => {
-    console.log(dataOrganization);
-  }, [dataOrganization]);
-
   return (
     <Card>
-      <h1>Edit Organisasi</h1>
-      <Divider variant="middle" />
-      <br />
       <CardContent>
         <form onSubmit={handleSubmit}>
           <TextField
@@ -182,4 +154,4 @@ const CardFormEditOrganization = () => {
   );
 };
 
-export default CardFormEditOrganization;
+export default CreateOrganization;

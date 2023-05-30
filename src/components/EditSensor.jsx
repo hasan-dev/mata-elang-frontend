@@ -1,10 +1,18 @@
-import { Card, CardContent, TextField, Button, Divider } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Divider,
+  Typography,
+  Link,
+} from "@mui/material";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useNavigate, useParams } from "react-router-dom";
 
-const CardFormEditSensor = () => {
+const EditSensor = () => {
   let { sensorId } = useParams();
   console.log(sensorId);
 
@@ -24,13 +32,11 @@ const CardFormEditSensor = () => {
   const navigate = useNavigate();
 
   if (!accessToken) {
-    // Jika access_token tidak ada, kembalikan ke halaman login
     navigate("/all-sensor");
   }
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // handle form submit here
     const dataSensorSubmit = {
       id: dataSensor.id,
       name: dataSensor.name,
@@ -72,11 +78,9 @@ const CardFormEditSensor = () => {
       .then(function (response) {
         console.log(response.data.data);
         if (!accessToken) {
-          // Jika access_token tidak ada, kembalikan ke halaman login
           navigate("/login");
         }
         setDataSensor(response.data.data);
-        // console.log(assetData);
       })
       .catch(function (error) {
         console.log(error);
@@ -183,9 +187,24 @@ const CardFormEditSensor = () => {
             Submit
           </Button>
         </form>
+        <Typography
+          variant="body2"
+          align="center"
+          style={{ marginTop: "16px" }}
+        >
+          Upload Rules?{" "}
+          <Link
+            component="button"
+            onClick={() => {
+              navigate(`/upload-rules/${sensorId}`);
+            }}
+          >
+            Click Here
+          </Link>
+        </Typography>
       </CardContent>
     </Card>
   );
 };
 
-export default CardFormEditSensor;
+export default EditSensor;

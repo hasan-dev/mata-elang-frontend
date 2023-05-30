@@ -1,45 +1,39 @@
 import LoginPage from "./pages/LoginPage";
-import CardFormAsset from "./components/CardFormAsset.jsx";
 import "./App.css";
-import CardFormSensor from "./components/CardFormSensor.jsx";
-import TableSensor from "./components/TableSensor.jsx";
-import TableAsset from "./components/TableAsset.jsx";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import CardFormOrganization from "./components/CardFormOrganization";
-import CardFormEditAsset from "./components/CardFormEditAsset";
-import CardFormEditSensor from "./components/CardFormEditSensor";
-import CardFormEditOrganization from "./components/CardFormEditOrganization";
 import PermanentDrawerLeft from "./components/PermanentDrawerLeft";
 import ChartSensor from "./components/ChartSensor";
+import AllAsset from "./components/AllAsset.jsx";
+import AllSensor from "./components/AllSensor.jsx";
+import CreateSensor from "./components/CreateSensor.jsx";
+import CreateOrganization from "./components/CreateOrganization";
+import UploadRules from "./components/UploadRules";
+import EditAsset from "./components/EditAsset";
+import EditSensor from "./components/EditSensor";
+import EditOrganization from "./components/EditOrganization";
+import { routes } from "./components/SidebarData";
 
 function App() {
-  // const [count, setCount] = useState(0);
-
   return (
     <>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/all-asset" element={<TableAsset />} />
-          <Route path="/all-sensor" element={<TableSensor />} />
-          <Route path="/form-sensor" element={<CardFormSensor />} />
-          <Route path="/form-asset" element={<CardFormAsset />} />
-          <Route path="/form-organization" element={<CardFormOrganization />} />
-          <Route
-            path="/form-edit-asset/:assetId"
-            element={<CardFormEditAsset />}
-          />
-          <Route
-            path="/form-edit-sensor/:sensorId"
-            element={<CardFormEditSensor />}
-          />
+          <Route path="/all-asset" element={<AllAsset />} />
+          <Route path="/all-sensor" element={<AllSensor />} />
+          <Route path="/form-sensor" element={<CreateSensor />} />
+          <Route path="/form-asset" element={<CreateSensor />} />
+          <Route path="/form-organization" element={<CreateOrganization />} />
+          <Route path="/upload-rules/:sensorId" element={<UploadRules />} />
+          <Route path="/form-edit-asset/:assetId" element={<EditAsset />} />
+          <Route path="/form-edit-sensor/:sensorId" element={<EditSensor />} />
           <Route
             path="/dashboard"
-            element={<PermanentDrawerLeft content={<TableSensor />} />}
+            element={<PermanentDrawerLeft routes={routes} />}
           />
           <Route
             path="/form-edit-organization"
-            element={<CardFormEditOrganization />}
+            element={<EditOrganization />}
           />
           <Route path="/chart" element={<ChartSensor />} />
         </Routes>

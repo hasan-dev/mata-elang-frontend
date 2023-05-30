@@ -1,10 +1,10 @@
-import { Card, CardContent, TextField, Button } from "@mui/material";
+import { Card, CardContent, TextField, Button, Divider } from "@mui/material";
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
-const CardFormOrganization = () => {
+const EditOrganization = () => {
   const [dataOrganization, setDataOrganization] = useState({
     name: "",
     email: "",
@@ -19,13 +19,11 @@ const CardFormOrganization = () => {
   const navigate = useNavigate();
 
   if (!accessToken) {
-    // Jika access_token tidak ada, kembalikan ke halaman login
     navigate("/login");
   }
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // handle form submit here
     const dataOrganizationSubmit = {
       name: dataOrganization.name,
       email: dataOrganization.email,
@@ -39,7 +37,7 @@ const CardFormOrganization = () => {
 
     axios
       .post(
-        "http://127.0.0.1:8001/api/Organizations/create",
+        "http://127.0.0.1:8001/api/organizations/create",
         dataOrganizationSubmit,
         {
           headers: {
@@ -56,8 +54,34 @@ const CardFormOrganization = () => {
       });
   };
 
+  useEffect(() => {
+    axios
+      .get("http://127.0.0.1:8001/api/organizations/6", {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
+      .then(function (response) {
+        console.log(response.data.data);
+        if (!accessToken) {
+          navigate("/login");
+        }
+        setDataOrganization(response.data.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, []);
+
+  useEffect(() => {
+    console.log(dataOrganization);
+  }, [dataOrganization]);
+
   return (
     <Card>
+      <h1>Edit Organisasi</h1>
+      <Divider variant="middle" />
+      <br />
       <CardContent>
         <form onSubmit={handleSubmit}>
           <TextField
@@ -154,4 +178,4 @@ const CardFormOrganization = () => {
   );
 };
 
-export default CardFormOrganization;
+export default EditOrganization;

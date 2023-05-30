@@ -4,7 +4,7 @@ import { useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
-const CardFormSensor = () => {
+const CreateSensor = () => {
   const [dataSensor, setDataSensor] = useState({
     id: "",
     name: "",
@@ -156,4 +156,4 @@ const CardFormSensor = () => {
   );
 };
 
-export default CardFormSensor;
+export default CreateSensor;

@@ -1,10 +1,13 @@
 import { Card, CardContent, TextField, Button, Divider } from "@mui/material";
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-const CardFormAsset = () => {
+const EditAsset = () => {
+  let { assetId } = useParams();
+  console.log(assetId);
+
   const [dataAsset, setDataAsset] = useState({
     name: "",
     organization_id: "",
@@ -17,13 +20,11 @@ const CardFormAsset = () => {
   const navigate = useNavigate();
 
   if (!accessToken) {
-    // Jika access_token tidak ada, kembalikan ke halaman login
     navigate("/login");
   }
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // handle form submit here
     const dataAssetSubmit = {
       name: dataAsset.name,
       organization_id: dataAsset.organization_id,
@@ -33,13 +34,16 @@ const CardFormAsset = () => {
     };
 
     axios
-      .post("http://127.0.0.1:8001/api/assets/register", dataAssetSubmit, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
+      .patch(
+        `http://127.0.0.1:8001/api/assets/update/${assetId}`,
+        dataAssetSubmit,
+        {
+          headers: {
+            Authorization: "Bearer " + accessToken,
+          },
+        }
+      )
       .then(function (response) {
-        console.log(response.status, response.data);
         navigate("/all-asset");
       })
       .catch(function (error) {
@@ -47,9 +51,29 @@ const CardFormAsset = () => {
       });
   };
 
+  useEffect(() => {
+    axios
+      .get(`http://127.0.0.1:8001/api/assets/${assetId}`, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
+      .then(function (response) {
+        if (!accessToken) {
+          navigate("/login");
+        }
+        setDataAsset(response.data.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, []);
+
+  useEffect(() => {}, [dataAsset]);
+
   return (
     <Card>
-      <h1>Create Asset</h1>
+      <h1>Edit Asset</h1>
       <Divider variant="middle" />
       <br />
       <CardContent>
@@ -80,7 +104,7 @@ const CardFormAsset = () => {
             }}
           />
           <TextField
-            label="sensor_id"
+            label="address"
             fullWidth
             margin="normal"
             value={dataAsset.sensor_id}
@@ -92,14 +116,14 @@ const CardFormAsset = () => {
             }}
           />
           <TextField
-            label="pic_id"
+            label="pic"
             fullWidth
             margin="normal"
-            value={dataAsset.pic}
+            value={dataAsset.pic_id}
             onChange={(event) => {
               setDataAsset({
                 ...dataAsset,
-                pic: event.target.value,
+                pic_id: event.target.value,
               });
             }}
           />
@@ -124,4 +148,4 @@ const CardFormAsset = () => {
   );
 };
 
-export default CardFormAsset;
+export default EditAsset;

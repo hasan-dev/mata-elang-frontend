@@ -30,9 +30,10 @@ const LoginPage = () => {
         if (response.status === 200) {
           // Simpan access_token ke dalam cookie
           Cookies.set("access_token", response.data.access_token);
+          Cookies.set("user_id", response.data.data.id);
 
           // Lanjutkan ke halaman selanjutnya
-          navigate("/all-sensor");
+          navigate("/dashboard");
         } else {
           // Tampilkan pesan error
           console.log(response.data.message);

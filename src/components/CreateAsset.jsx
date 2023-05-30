@@ -1,13 +1,10 @@
 import { Card, CardContent, TextField, Button, Divider } from "@mui/material";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Cookies from "js-cookie";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-const CardFormEditAsset = () => {
-  let { assetId } = useParams();
-  console.log(assetId);
-
+const CreateAsset = () => {
   const [dataAsset, setDataAsset] = useState({
     name: "",
     organization_id: "",
@@ -36,52 +33,23 @@ const CardFormEditAsset = () => {
     };
 
     axios
-      .patch(
-        `http://127.0.0.1:8001/api/assets/update/${assetId}`,
-        dataAssetSubmit,
-        {
-          headers: {
-            Authorization: "Bearer " + accessToken,
-          },
-        }
-      )
-      .then(function (response) {
-        // console.log(response.status, response.data);
-        navigate("/all-asset");
-      })
-      .catch(function (error) {
-        // console.log(error);
-      });
-  };
-
-  useEffect(() => {
-    axios
-      .get(`http://127.0.0.1:8001/api/assets/${assetId}`, {
+      .post("http://127.0.0.1:8001/api/assets/register", dataAssetSubmit, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
       })
       .then(function (response) {
-        // console.log(response.data.data);
-        if (!accessToken) {
-          // Jika access_token tidak ada, kembalikan ke halaman login
-          navigate("/login");
-        }
-        setDataAsset(response.data.data);
-        // console.log(assetData);
+        console.log(response.status, response.data);
+        navigate("/all-asset");
       })
       .catch(function (error) {
-        // console.log(error);
+        console.log(error);
       });
-  }, []);
-
-  useEffect(() => {
-    // console.log(dataAsset);
-  }, [dataAsset]);
+  };
 
   return (
     <Card>
-      <h1>Edit Asset</h1>
+      <h1>Create Asset</h1>
       <Divider variant="middle" />
       <br />
       <CardContent>
@@ -112,7 +80,7 @@ const CardFormEditAsset = () => {
             }}
           />
           <TextField
-            label="address"
+            label="sensor_id"
             fullWidth
             margin="normal"
             value={dataAsset.sensor_id}
@@ -124,14 +92,14 @@ const CardFormEditAsset = () => {
             }}
           />
           <TextField
-            label="pic"
+            label="pic_id"
             fullWidth
             margin="normal"
-            value={dataAsset.pic_id}
+            value={dataAsset.pic}
             onChange={(event) => {
               setDataAsset({
                 ...dataAsset,
-                pic_id: event.target.value,
+                pic: event.target.value,
               });
             }}
           />
@@ -156,4 +124,4 @@ const CardFormEditAsset = () => {
   );
 };
 
-export default CardFormEditAsset;
+export default CreateAsset;

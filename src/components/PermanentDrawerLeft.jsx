@@ -1,22 +1,63 @@
-import Box from "@mui/material/Box";
-import Drawer from "@mui/material/Drawer";
-import CssBaseline from "@mui/material/CssBaseline";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import List from "@mui/material/List";
-import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
-import { Route } from "./SidebarData";
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  CssBaseline,
+  AppBar,
+  Toolbar,
+  Typography,
+  Drawer,
+  Divider,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
+import { Link, useLocation } from "react-router-dom";
+import AllSensor from "./AllSensor";
+import AllAsset from "./AllAsset";
+import EditOrganization from "./EditOrganization";
+import ProfilePage from "./Profile";
+import ChartSensor from "./ChartSensor";
 
-const drawerWidth = 240;
+const PermanentDrawerLeft = ({ routes }) => {
+  const drawerWidth = 240;
 
-export default function PermanentDrawerLeft(props) {
+  const [activeContent, setActiveContent] = useState(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    handleRouteSelect(null, location.pathname);
+  }, [location]);
+
+  const handleRouteSelect = (event, path) => {
+    event?.preventDefault();
+    switch (path) {
+      case "/dashboard":
+        setActiveContent(<ChartSensor />);
+        break;
+      case "/all-sensor":
+        setActiveContent(<AllSensor />);
+        break;
+      case "/all-asset":
+        setActiveContent(<AllAsset />);
+        break;
+      case "/organization":
+        setActiveContent(<EditOrganization />);
+        break;
+      case "/profile":
+        setActiveContent(<ProfilePage />);
+        break;
+      default:
+        setActiveContent(null);
+        break;
+    }
+  };
+
+  const getRouteName = (path) => {
+    const route = routes.find((route) => route.path === path);
+    return route ? route.name : "";
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -26,7 +67,7 @@ export default function PermanentDrawerLeft(props) {
       >
         <Toolbar>
           <Typography variant="h6" noWrap component="div">
-            Dashboard
+            {getRouteName(location.pathname)}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -45,14 +86,19 @@ export default function PermanentDrawerLeft(props) {
         <Toolbar />
         <Divider />
         <List>
-          {Route.map((route, index) => (
-            <ListItem key={route.name} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={route.name} />
-              </ListItemButton>
+          {routes.map((route) => (
+            <ListItem
+              key={route.path}
+              button
+              component={Link}
+              to={route.path}
+              exact
+              onClick={(event) => handleRouteSelect(event, route.path)}
+            >
+              <ListItemIcon>
+                <route.icon />
+              </ListItemIcon>
+              <ListItemText primary={route.name} />
             </ListItem>
           ))}
         </List>
@@ -61,8 +107,10 @@ export default function PermanentDrawerLeft(props) {
         component="main"
         sx={{ flexGrow: 1, bgcolor: "background.default", p: 3 }}
       >
-        {props.content}
+        {activeContent}
       </Box>
     </Box>
   );
-}
+};
+
+export default PermanentDrawerLeft;
