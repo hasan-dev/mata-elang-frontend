@@ -19,13 +19,11 @@ const CreateOrganization = () => {
   const navigate = useNavigate();
 
   if (!accessToken) {
-    // Jika access_token tidak ada, kembalikan ke halaman login
     navigate("/login");
   }
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // handle form submit here
     const dataOrganizationSubmit = {
       name: dataOrganization.name,
       email: dataOrganization.email,

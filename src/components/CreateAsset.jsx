@@ -1,4 +1,11 @@
-import { Card, CardContent, TextField, Button, Divider } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Divider,
+  Typography,
+} from "@mui/material";
 import axios from "axios";
 import { useState } from "react";
 import Cookies from "js-cookie";
@@ -17,13 +24,11 @@ const CreateAsset = () => {
   const navigate = useNavigate();
 
   if (!accessToken) {
-    // Jika access_token tidak ada, kembalikan ke halaman login
     navigate("/login");
   }
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // handle form submit here
     const dataAssetSubmit = {
       name: dataAsset.name,
       organization_id: dataAsset.organization_id,
@@ -48,12 +53,34 @@ const CreateAsset = () => {
   };
 
   return (
-    <Card>
-      <h1>Create Asset</h1>
+    <Card
+      sx={{
+        maxWidth: 800,
+        mx: "auto",
+        my: 8,
+      }}
+    >
+      <Typography
+        variant="h2"
+        align="center"
+        sx={{
+          marginTop: 2,
+        }}
+      >
+        Create Asset
+      </Typography>
       <Divider variant="middle" />
       <br />
       <CardContent>
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <TextField
             label="name"
             fullWidth
@@ -115,7 +142,14 @@ const CreateAsset = () => {
               });
             }}
           />
-          <Button variant="contained" color="primary" type="submit">
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            sx={{
+              marginTop: 2,
+            }}
+          >
             Submit
           </Button>
         </form>

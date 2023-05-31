@@ -18,10 +18,11 @@ import AllAsset from "./AllAsset";
 import EditOrganization from "./EditOrganization";
 import ProfilePage from "./Profile";
 import ChartSensor from "./ChartSensor";
+import AllUser from "./AllUser";
+import CreateSensor from "./CreateSensor";
 
 const PermanentDrawerLeft = ({ routes }) => {
   const drawerWidth = 240;
-
   const [activeContent, setActiveContent] = useState(null);
   const location = useLocation();
 
@@ -46,6 +47,12 @@ const PermanentDrawerLeft = ({ routes }) => {
         break;
       case "/profile":
         setActiveContent(<ProfilePage />);
+        break;
+      case "/user":
+        setActiveContent(<AllUser />);
+        break;
+      case "/form-sensor":
+        setActiveContent(<CreateSensor />);
         break;
       default:
         setActiveContent(null);
@@ -105,7 +112,7 @@ const PermanentDrawerLeft = ({ routes }) => {
       </Drawer>
       <Box
         component="main"
-        sx={{ flexGrow: 1, bgcolor: "background.default", p: 3 }}
+        // sx={{ flexGrow: 1, bgcolor: "background.default", p: 3 }}
       >
         {activeContent}
       </Box>

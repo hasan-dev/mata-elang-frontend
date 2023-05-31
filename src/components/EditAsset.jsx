@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useNavigate, useParams } from "react-router-dom";
 
-const EditAsset = () => {
+const EditAsset = ({ props }) => {
   let { assetId } = useParams();
-  console.log(assetId);
+  console.log(props);
 
   const [dataAsset, setDataAsset] = useState({
     name: "",
@@ -35,7 +35,7 @@ const EditAsset = () => {
 
     axios
       .patch(
-        `http://127.0.0.1:8001/api/assets/update/${assetId}`,
+        `http://127.0.0.1:8001/api/assets/update/${props}`,
         dataAssetSubmit,
         {
           headers: {
@@ -53,7 +53,7 @@ const EditAsset = () => {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8001/api/assets/${assetId}`, {
+      .get(`http://127.0.0.1:8001/api/assets/${props}`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },

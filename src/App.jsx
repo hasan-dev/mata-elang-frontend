@@ -12,6 +12,7 @@ import EditAsset from "./components/EditAsset";
 import EditSensor from "./components/EditSensor";
 import EditOrganization from "./components/EditOrganization";
 import { routes } from "./components/SidebarData";
+import AllUser from "./components/AllUser";
 
 function App() {
   return (
@@ -19,8 +20,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/all-asset" element={<AllAsset />} />
-          <Route path="/all-sensor" element={<AllSensor />} />
+          {/* <Route path="/all-asset" element={<AllAsset />} />
+          <Route path="/all-sensor" element={<AllSensor />} /> */}
           <Route path="/form-sensor" element={<CreateSensor />} />
           <Route path="/form-asset" element={<CreateSensor />} />
           <Route path="/form-organization" element={<CreateOrganization />} />

@@ -12,7 +12,7 @@ import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useNavigate, useParams } from "react-router-dom";
 
-const EditSensor = () => {
+const EditSensor = ({ props }) => {
   let { sensorId } = useParams();
   console.log(sensorId);
 
@@ -51,7 +51,7 @@ const EditSensor = () => {
 
     axios
       .patch(
-        `http://127.0.0.1:8001/api/sensors/update/${sensorId}`,
+        `http://127.0.0.1:8001/api/sensors/update/${props}`,
         dataSensorSubmit,
         {
           headers: {
@@ -70,7 +70,7 @@ const EditSensor = () => {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8001/api/sensors/${sensorId}`, {
+      .get(`http://127.0.0.1:8001/api/sensors/${props}`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
@@ -92,12 +92,34 @@ const EditSensor = () => {
   }, [dataSensor]);
 
   return (
-    <Card>
-      <h1>Edit Sensor</h1>
+    <Card
+      sx={{
+        maxWidth: 800,
+        mx: "auto",
+        my: 8,
+      }}
+    >
+      <Typography
+        variant="h2"
+        align="center"
+        sx={{
+          marginTop: 2,
+        }}
+      >
+        Edit Sensor
+      </Typography>
       <Divider variant="middle" />
       <br />
       <CardContent>
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <TextField
             label="name"
             fullWidth
@@ -183,7 +205,14 @@ const EditSensor = () => {
               });
             }}
           />
-          <Button variant="contained" color="primary" type="submit">
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            sx={{
+              marginTop: 2,
+            }}
+          >
             Submit
           </Button>
         </form>

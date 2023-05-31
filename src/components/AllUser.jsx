@@ -1,31 +1,18 @@
-import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
+import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import Button from "@mui/material/Button";
+import { Box, Button, Grid, Stack, TextField, Typography } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import Stack from "@mui/material/Stack";
-import {
-  Box,
-  Card,
-  Divider,
-  Grid,
-  Modal,
-  TextField,
-  Typography,
-} from "@mui/material";
-import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import CreateAsset from "./CreateAsset";
-import EditAsset from "./EditAsset";
+import Cookies from "js-cookie";
+import axios from "axios";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -47,22 +34,19 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-export default function AllAsset() {
-  const [assetData, setAssetData] = useState([]);
+export default function AllUser() {
+  const [userData, setuserData] = useState([]);
   const accessToken = Cookies.get("access_token");
   const navigate = useNavigate();
   const userId = Cookies.get("user_id");
   const [organizationData, setOrganizationData] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoadingOrganization, setIsLoadingOrganization] = useState(true);
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
 
   const selectOrganization = (event) => {
     const selectedValue = event.target.value;
     if (!selectedValue) {
-      setAssetData([]);
+      setuserData([]);
       setSelectedOption("");
       return;
     }
@@ -73,7 +57,7 @@ export default function AllAsset() {
     console.log("Selected Value:", selectedValue);
     axios
       .get(
-        `http://127.0.0.1:8001/api/organizations/${selectedValue}/assets/all`,
+        `http://127.0.0.1:8001/api/organizations/${selectedValue}/users/all`,
         {
           headers: {
             Authorization: "Bearer " + accessToken,
@@ -85,7 +69,7 @@ export default function AllAsset() {
         if (!accessToken) {
           navigate("/login");
         }
-        setAssetData(response.data.data);
+        setuserData(response.data.data);
       })
       .catch(function (error) {
         console.log(error);
@@ -126,36 +110,32 @@ export default function AllAsset() {
       <Grid container spacing={2} direction="column">
         <Grid item>
           <Box display="flex" justifyContent="space-between">
-            {!isLoadingOrganization && (
-              <TextField
-                id="list-organization-user"
-                select
-                label="Select Organization"
-                defaultValue={selectedOption}
-                value={selectedOption}
-                onChange={selectOrganization}
-                SelectProps={{
-                  native: true,
-                }}
-                helperText="Please select your organization"
-              >
-                <option value=""></option>
-                {organizationData.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </TextField>
-            )}
-            <Button onClick={handleOpen}>Add Asset</Button>
-            <Modal
-              open={open}
-              onClose={handleClose}
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
+            <TextField
+              id="list-organization-user"
+              select
+              label="Select Organization"
+              defaultValue={selectedOption}
+              value={selectedOption}
+              onChange={selectOrganization}
+              SelectProps={{
+                native: true,
+              }}
+              helperText="Please select your organization"
             >
-              <CreateAsset />
-            </Modal>
+              <option value=""></option>
+              {organizationData.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </TextField>
+            <Button
+              onClick={() => {
+                console.log("Add User");
+              }}
+            >
+              Add User
+            </Button>
           </Box>
         </Grid>
         <Grid item>
@@ -173,33 +153,34 @@ export default function AllAsset() {
                 <TableRow>
                   <StyledTableCell>ID</StyledTableCell>
                   <StyledTableCell align="right">Name</StyledTableCell>
-                  <StyledTableCell align="right">Description</StyledTableCell>
-                  <StyledTableCell align="right">PIC</StyledTableCell>
-                  <StyledTableCell align="right">Sensor Name</StyledTableCell>
-                  <StyledTableCell align="center">
-                    Organization Name
-                  </StyledTableCell>
+                  <StyledTableCell align="right">Organization</StyledTableCell>
+                  <StyledTableCell align="right">Email</StyledTableCell>
+                  <StyledTableCell align="right">Role</StyledTableCell>
                   <StyledTableCell align="center">Action</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {assetData.map((row) => (
+                {Object.values(userData).map((row) => (
                   <StyledTableRow key={row.id}>
                     <StyledTableCell component="th" scope="row">
                       {row.id}
                     </StyledTableCell>
                     <StyledTableCell align="right">{row.name}</StyledTableCell>
+                    <StyledTableCell align="right">{row.email}</StyledTableCell>
                     <StyledTableCell align="right">
-                      {row.description}
+                      {row.phone_number}
                     </StyledTableCell>
                     <StyledTableCell align="right">
-                      {row.user_name}
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      {row.sensor_name}
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      {row.organization_name}
+                      {row.role.map((role, index) => (
+                        <Typography
+                          key={role.id}
+                          component="span"
+                          display="inline"
+                        >
+                          {role.name}
+                          {index !== row.role.length - 1 && ", "}
+                        </Typography>
+                      ))}
                     </StyledTableCell>
                     <Stack direction="row" spacing={2} p={2}>
                       <Button
@@ -209,21 +190,9 @@ export default function AllAsset() {
                       >
                         Delete
                       </Button>
-                      <Button
-                        variant="contained"
-                        endIcon={<EditIcon />}
-                        onClick={handleOpen}
-                      >
-                        Edit Asset
+                      <Button variant="contained" endIcon={<EditIcon />}>
+                        Edit
                       </Button>
-                      <Modal
-                        open={open}
-                        onClose={handleClose}
-                        aria-labelledby="modal-modal-title"
-                        aria-describedby="modal-modal-description"
-                      >
-                        <EditAsset props={row.id} />
-                      </Modal>
                     </Stack>
                   </StyledTableRow>
                 ))}
