@@ -28,8 +28,8 @@ const ChartSensor = () => {
     axios
       .get("http://127.0.0.1:8002/api/test/1")
       .then((response) => {
-        console.log(response);
-        setSensorCounts(response.data.message);
+        // console.log(response);
+        setSensorCounts(response.data);
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -65,13 +65,17 @@ const ChartSensor = () => {
   }, []);
 
   useEffect(() => {
+    // console.log(sensorCounts)
     const newData = [
       { x: "Active", y: sensorCounts.active },
       { x: "Deactive", y: sensorCounts.nonActive },
     ];
-
-    setData(newData);
-  }, [sensorCounts]);
+  
+    // Menghapus item dengan nilai 0
+    const filteredData = newData.filter((item) => item.y !== 0);
+  
+    setData(filteredData);
+  }, [sensorCounts]);;
 
   return (
     <>
@@ -106,10 +110,10 @@ const ChartSensor = () => {
               colorScale={["#1f77b4", "#ff7f0e"]}
               width={300}
               height={300}
-              labelRadius={({ innerRadius }) => innerRadius + 5}
+              innerRadius={({ datum }) => datum.y * 20}
               radius={({ datum }) => 80 + datum.y * 20}
-              innerRadius={30}
-              labelPosition={"centroid"}
+              // innerRadius={30}
+              labelPosition={"startAngle"}
               labelPlacement={"vertical"}
             />
           </Box>
