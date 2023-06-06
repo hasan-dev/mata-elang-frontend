@@ -1,18 +1,29 @@
-import { styled } from "@mui/material/styles";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell, { tableCellClasses } from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import { Box, Button, Grid, Stack, TextField, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  Stack,
+  TextField,
+  Button,
+  Grid,
+  styled,
+  TableCell,
+  tableCellClasses,
+  TableRow,
+  Table,
+  TableHead,
+  TableBody,
+  Modal,
+  TableContainer,
+  Paper,
+  Typography,
+  Box,
+} from "@mui/material";
+import CancelIcon from "@mui/icons-material/Cancel";
+import CheckIcon from "@mui/icons-material/Check";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
-import axios from "axios";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -35,20 +46,22 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
+const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
-export default function AllUser() {
-  const [userData, setuserData] = useState([]);
+export default function AllRole() {
+  const [roleData, setRoleData] = useState([]);
   const accessToken = Cookies.get("access_token");
   const navigate = useNavigate();
   const userId = Cookies.get("user_id");
   const [organizationData, setOrganizationData] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoadingOrganization, setIsLoadingOrganization] = useState(true);
+  const [selectedNames, setSelectedNames] = useState([]);
 
   const selectOrganization = (event) => {
     const selectedValue = event.target.value;
     if (!selectedValue) {
-      setuserData([]);
+      setRoleData([]);
       setSelectedOption("");
       return;
     }
@@ -56,19 +69,21 @@ export default function AllUser() {
       return;
     }
     setSelectedOption(selectedValue);
-    console.log("Selected Value:", selectedValue);
+    // console.log("Selected Value:", selectedValue);
     axios
-      .get(`${urlGateway}/organizations/${selectedValue}/users/all`, {
+      .get(`${urlGateway}/organizations/${selectedValue}/roles/all`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
       })
       .then(function (response) {
         console.log(response.data.data);
+        const roles = response.data.data;
         if (!accessToken) {
           navigate("/login");
         }
-        setuserData(response.data.data);
+        console.log(roles);
+        setRoleData(roles);
       })
       .catch(function (error) {
         console.log(error);
@@ -83,7 +98,7 @@ export default function AllUser() {
         },
       })
       .then(function (response) {
-        console.log(response.data.data);
+        // console.log(response.data.data);
         const organizationDatas = response.data.data.organization.map(
           (org) => ({
             id: org.id,
@@ -97,7 +112,7 @@ export default function AllUser() {
 
         setOrganizationData(organizationDatas);
         setIsLoadingOrganization(false);
-        console.log(organizationDatas);
+        // console.log(organizationDatas);
       })
       .catch(function (error) {
         console.log(error);
@@ -125,35 +140,33 @@ export default function AllUser() {
             p: 3,
           }}
         >
-          <Box display="flex" justifyContent="space-between">
-            <TextField
-              id="list-organization-user"
-              select
-              label="Select Organization"
-              defaultValue={selectedOption}
-              value={selectedOption}
-              onChange={selectOrganization}
-              SelectProps={{
-                native: true,
-              }}
-              helperText="Please select your organization"
-            >
-              <option value=""></option>
-              {organizationData.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.name}
-                </option>
-              ))}
-            </TextField>
-            <Button
-              onClick={() => {
-                console.log("Add User");
-              }}
-            >
-              Add User
-            </Button>
-          </Box>
+          <Grid container spacing={2} direction="column">
+            <Grid item>
+              {!isLoadingOrganization && (
+                <TextField
+                  id="list-organization-user"
+                  select
+                  label="Select Organization"
+                  defaultValue={selectedOption}
+                  value={selectedOption}
+                  onChange={selectOrganization}
+                  SelectProps={{
+                    native: true,
+                  }}
+                  helperText="Please select your organization"
+                >
+                  <option value=""></option>
+                  {organizationData.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name}
+                    </option>
+                  ))}
+                </TextField>
+              )}
+            </Grid>
+          </Grid>
         </Box>
+
         <Box
           sx={{
             p: 3,
@@ -173,32 +186,26 @@ export default function AllUser() {
                 <TableRow>
                   <StyledTableCell>ID</StyledTableCell>
                   <StyledTableCell align="right">Name</StyledTableCell>
-                  <StyledTableCell align="right">Organization</StyledTableCell>
-                  <StyledTableCell align="right">Email</StyledTableCell>
-                  <StyledTableCell align="right">Role</StyledTableCell>
+                  <StyledTableCell align="right">Permission</StyledTableCell>
                   <StyledTableCell align="center">Action</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {Object.values(userData).map((row) => (
+                {roleData.map((row) => (
                   <StyledTableRow key={row.id}>
                     <StyledTableCell component="th" scope="row">
                       {row.id}
                     </StyledTableCell>
                     <StyledTableCell align="right">{row.name}</StyledTableCell>
-                    <StyledTableCell align="right">{row.email}</StyledTableCell>
                     <StyledTableCell align="right">
-                      {row.phone_number}
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      {row.role.map((role, index) => (
+                      {row.permissions.map((permission, index) => (
                         <Typography
-                          key={role.id}
+                          key={permission.id}
                           component="span"
                           display="inline"
                         >
-                          {role.name}
-                          {index !== row.role.length - 1 && ", "}
+                          {permission.name}
+                          {index !== row.permissions.length - 1 && ", "}
                         </Typography>
                       ))}
                     </StyledTableCell>
@@ -211,7 +218,7 @@ export default function AllUser() {
                         Delete
                       </Button>
                       <Button variant="contained" endIcon={<EditIcon />}>
-                        Edit
+                        Edit Role
                       </Button>
                     </Stack>
                   </StyledTableRow>
@@ -223,4 +230,73 @@ export default function AllUser() {
       </Box>
     </>
   );
+}
+
+{
+  /* <FormControl sx={{ m: 1, width: 500 }}>
+        <TextField
+            label="Name"
+            fullWidth
+            margin="normal"
+        />
+        <TextField
+            label="Organization"
+            fullWidth
+            margin="normal"
+        />
+        
+      <Select
+        multiple
+        value={selectedNames}
+        onChange={(e) => setSelectedNames(e.target.value)}
+        input={
+            <OutlinedInput
+              label=""
+              sx={{ color: "black" }}
+              inputProps={{ 'aria-label': 'Name' }}
+            />
+          }
+        renderValue={(selected) => (
+            <Stack gap={1} direction="row" flexWrap="wrap">
+              {selected.map((value) => (
+                <Chip
+                  key={value}
+                  label={value}
+                  onDelete={() =>
+                    setSelectedNames(
+                      selectedNames.filter((item) => item !== value)
+                    )
+                  }
+                  deleteIcon={
+                    <CancelIcon
+                      onMouseDown={(event) => event.stopPropagation()}
+                    />
+                  }
+                />
+              ))}
+            </Stack>
+          )}
+        >
+          {roleData.map((roles) => (
+            <MenuItem
+              key={roles.id}
+              value={roles.name}
+              sx={{ justifyContent: "space-between" }}
+            >
+              {roles.name}
+              {selectedNames.includes(name) ? <CheckIcon color="info" /> : null}
+            </MenuItem>
+          ))}
+        </Select>
+        <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            sx={{
+              marginTop: 2,
+            }}
+          >
+            Submit
+          </Button>
+      </FormControl> */
 }

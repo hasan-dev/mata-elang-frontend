@@ -47,6 +47,9 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
+const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
+const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
+
 export default function AllAsset() {
   const [assetData, setAssetData] = useState([]);
   const accessToken = Cookies.get("access_token");
@@ -72,14 +75,11 @@ export default function AllAsset() {
     setSelectedOption(selectedValue);
     console.log("Selected Value:", selectedValue);
     axios
-      .get(
-        `http://127.0.0.1:8001/api/organizations/${selectedValue}/assets/all`,
-        {
-          headers: {
-            Authorization: "Bearer " + accessToken,
-          },
-        }
-      )
+      .get(`${urlGateway}/organizations/${selectedValue}/assets/all`, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
       .then(function (response) {
         console.log(response.data.data);
         if (!accessToken) {
@@ -94,7 +94,7 @@ export default function AllAsset() {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8001/api/users/${userId}`, {
+      .get(`${import.meta.env.VITE_URL_API_GATEWAY}/users/${userId}`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
@@ -123,8 +123,25 @@ export default function AllAsset() {
 
   return (
     <>
-      <Grid container spacing={2} direction="column">
-        <Grid item>
+      <Box
+        sx={{
+          display: "flex",
+          bgcolor: "background.paper",
+          border: 1,
+          borderColor: "grey.500",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignContent: "center",
+          borderRadius: "16px",
+          boxShadow: 3,
+          mt: 10,
+        }}
+      >
+        <Box
+          sx={{
+            p: 3,
+          }}
+        >
           <Box display="flex" justifyContent="space-between">
             {!isLoadingOrganization && (
               <TextField
@@ -157,8 +174,12 @@ export default function AllAsset() {
               <CreateAsset />
             </Modal>
           </Box>
-        </Grid>
-        <Grid item>
+        </Box>
+        <Box
+          sx={{
+            p: 3,
+          }}
+        >
           <TableContainer
             component={Paper}
             sx={{
@@ -230,8 +251,8 @@ export default function AllAsset() {
               </TableBody>
             </Table>
           </TableContainer>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </>
   );
 }

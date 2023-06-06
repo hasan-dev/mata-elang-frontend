@@ -8,9 +8,12 @@ import {
   Grid,
 } from "@mui/material";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+
+const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
+const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
 const CreateSensor = () => {
   const [dataSensor, setDataSensor] = useState({
@@ -23,9 +26,12 @@ const CreateSensor = () => {
     protected_subnet: "",
     organization_id: "",
     external_subnet: "",
+    oinkcode: "",
   });
+  const [organizationDatas, setOrganizationDatas] = useState([{}]);
 
   const accessToken = Cookies.get("access_token");
+  const userId = Cookies.get("user_id");
   const navigate = useNavigate();
 
   if (!accessToken) {
@@ -44,10 +50,11 @@ const CreateSensor = () => {
       protected_subnet: dataSensor.protected_subnet,
       organization_id: dataSensor.organization_id,
       external_subnet: dataSensor.external_subnet,
+      oinkcode: dataSensor.oinkcode,
     };
 
     axios
-      .post("http://127.0.0.1:8001/api/sensors/register", dataSensorSubmit, {
+      .post(`${urlGateway}/sensors/register`, dataSensorSubmit, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
@@ -61,11 +68,37 @@ const CreateSensor = () => {
       });
   };
 
+  useEffect(() => {
+    axios
+      .get(`${urlGateway}/users/${userId}`, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
+      .then(function (response) {
+        console.log(response.data.data);
+        const organizationDatas = response.data.data.organization.map(
+          (org) => ({
+            id: org.id,
+            name: org.name,
+          })
+        );
+
+        if (!accessToken) {
+          navigate("/login");
+        }
+        setOrganizationDatas(organizationDatas);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, []);
+
   return (
     <>
       <Card
         sx={{
-          maxWidth: 800,
+          maxWidth: 600,
           mx: "auto",
           my: 8,
         }}
@@ -100,19 +133,23 @@ const CreateSensor = () => {
                 setDataSensor({ ...dataSensor, name: event.target.value });
               }}
             />
-            <TextField
-              required
-              label="organization_id"
-              fullWidth
-              margin="normal"
-              value={dataSensor.organization_id}
-              onChange={(event) => {
-                setDataSensor({
-                  ...dataSensor,
-                  organization_id: event.target.value,
-                });
-              }}
-            />
+            {organizationDatas.map((org) => (
+              <TextField
+                key={org.id}
+                disabled={true}
+                label="organization"
+                fullWidth
+                margin="normal"
+                value={org.name}
+                onChange={(event) => {
+                  setDataSensor({
+                    ...dataSensor,
+                    organization_id: org.id,
+                  });
+                }}
+              />
+            ))}
+            {console.log(organizationDatas)}
             <TextField
               label="external_subnet"
               fullWidth
@@ -176,6 +213,18 @@ const CreateSensor = () => {
                 setDataSensor({
                   ...dataSensor,
                   network_interface: event.target.value,
+                });
+              }}
+            />
+            <TextField
+              label="oinkcode"
+              fullWidth
+              margin="normal"
+              value={dataSensor.oinkcode}
+              onChange={(event) => {
+                setDataSensor({
+                  ...dataSensor,
+                  oinkcode: event.target.value,
                 });
               }}
             />

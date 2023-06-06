@@ -15,6 +15,20 @@ import { routes } from "./components/SidebarData";
 import AllUser from "./components/AllUser";
 import Layout from "./components/Layout";
 import ProfilePage from "./components/Profile";
+import Testing from "./components/Testing";
+import OrganizationDetail from "./components/OrganizationDetail";
+import AllRole from "./components/AllRole";
+
+import { Navigate, Outlet } from 'react-router-dom'
+import Cookies from "js-cookie";
+
+
+const PrivateRoutes = () => {
+  let auth = Cookies.get("access_token");
+return (
+    auth ? <Outlet/> : <Navigate to='/'/>
+  )
+}
 
 function App() {
   return (
@@ -22,14 +36,18 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/dashboard" element={<PermanentDrawerLeft />}>
-              <Route index element={<ChartSensor />} />
-              <Route path="all-asset" element={<AllAsset />} />
-              <Route path="all-sensor" element={<AllSensor />} />
-              <Route path="organization" element={<EditOrganization />} />
-              <Route path="profile" element={<ProfilePage/>} />
-              <Route path="user" element={<AllUser />} />
-        </Route>
+          <Route element={<PrivateRoutes/>}>
+              <Route path="/dashboard" element={<PermanentDrawerLeft />}>
+                  <Route index element={<ChartSensor />} />
+                  <Route path="all-asset" element={<AllAsset />} />
+                  <Route path="all-sensor" element={<AllSensor />} />
+                  <Route path="organization" element={<OrganizationDetail />} />
+                  <Route path="profile" element={<ProfilePage/>} />
+                  <Route path="user" element={<AllUser />} />
+                  <Route path="role" element={<AllRole />} />
+                  <Route path="testing" element={<Testing/>} />
+            </Route>
+          </Route>
         </Routes>
       </BrowserRouter>
     </>

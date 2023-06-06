@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useNavigate, useParams } from "react-router-dom";
 
+const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
+const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
+
 const EditAsset = ({ props }) => {
   let { assetId } = useParams();
   console.log(props);
@@ -34,15 +37,11 @@ const EditAsset = ({ props }) => {
     };
 
     axios
-      .patch(
-        `http://127.0.0.1:8001/api/assets/update/${props}`,
-        dataAssetSubmit,
-        {
-          headers: {
-            Authorization: "Bearer " + accessToken,
-          },
-        }
-      )
+      .patch(`${urlGateway}/assets/update/${props}`, dataAssetSubmit, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
       .then(function (response) {
         navigate("/all-asset");
       })
@@ -53,7 +52,7 @@ const EditAsset = ({ props }) => {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8001/api/assets/${props}`, {
+      .get(`${urlGateway}/assets/${props}`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },

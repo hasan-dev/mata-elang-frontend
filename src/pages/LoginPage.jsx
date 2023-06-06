@@ -5,6 +5,8 @@ import {
   TextField,
   Button,
   Typography,
+  CardHeader,
+  Avatar,
 } from "@mui/material";
 import axios from "axios";
 import { useState } from "react";
@@ -63,10 +65,17 @@ const LoginPage = () => {
   return (
     <div style={{ display: "flex", justifyContent: "center", marginTop: 50 }}>
       <Card style={{ width: 400 }}>
-        <CardContent>
-          <Typography variant="h5" component="h2" gutterBottom>
-            Login
+      <CardHeader
+        avatar={
+          <Avatar src="/logo.jpeg"  sx={{ width: 64, height: 64 }}/>
+        }
+        title={
+          <Typography variant="h4" my="auto" mr={4}>
+            Mata Elang
           </Typography>
+        }
+      />
+        <CardContent>
           <form onSubmit={postLogin}>
             <TextField
               variant="outlined"

@@ -25,6 +25,7 @@ import { Dashboard, DashboardCustomize } from "@mui/icons-material";
 import BusinessIcon from "@mui/icons-material/Business";
 import Profile from "@mui/icons-material/AccountCircle";
 import PeopleIcon from "@mui/icons-material/People";
+import AccessibilityIcon from '@mui/icons-material/Accessibility';
 
 const PermanentDrawerLeft = ({children}) => {
   const drawerWidth = 240;
@@ -35,8 +36,10 @@ const PermanentDrawerLeft = ({children}) => {
     { name: "Sensor", icon: MailIcon, path: "/dashboard/all-sensor" },
     { name: "Asset", icon: DashboardCustomize, path: "/dashboard/all-asset" },
     { name: "Organization", icon: BusinessIcon, path: "/dashboard/organization" },
+    { name: "Role", icon: AccessibilityIcon, path: "/dashboard/role" },
     { name: "User", icon: PeopleIcon, path: "/dashboard/user" },
     { name: "Profile", icon: Profile, path: "/dashboard/profile" },
+    { name: "Testing", icon: Profile, path: "/dashboard/testing"}
   ];
 
   const currentMenuItem = menuItems.find((item) => item.path === location.pathname);

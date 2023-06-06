@@ -6,14 +6,28 @@ import {
   Divider,
   Typography,
   Link,
+  Modal,
 } from "@mui/material";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useNavigate, useParams } from "react-router-dom";
+import UploadRules from "./UploadRules";
 
-const EditSensor = ({ props }) => {
-  let { sensorId } = useParams();
+const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
+const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
+
+const EditSensor = ({ sensorData, sensorId }) => {
+  // let { sensorId } = useParams();
+  const [openChildModal, setOpenChildModal] = useState(false);
+
+  const handleOpenChildModal = () => {
+    setOpenChildModal(true);
+  };
+
+  const handleCloseChildModal = () => {
+    setOpenChildModal(false);
+  };
   console.log(sensorId);
 
   const [dataSensor, setDataSensor] = useState({
@@ -50,18 +64,14 @@ const EditSensor = ({ props }) => {
     };
 
     axios
-      .patch(
-        `http://127.0.0.1:8001/api/sensors/update/${props}`,
-        dataSensorSubmit,
-        {
-          headers: {
-            Authorization: "Bearer " + accessToken,
-          },
-        }
-      )
+      .patch(`${urlGateway}/sensors/update/${sensorId}`, dataSensorSubmit, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
       .then(function (response) {
         console.log(response.status, response.data);
-        navigate("/all-sensor");
+        navigate("/dashboard/all-sensor");
       })
       .catch(function (error) {
         console.log(error);
@@ -70,7 +80,7 @@ const EditSensor = ({ props }) => {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8001/api/sensors/${props}`, {
+      .get(`${urlGateway}/sensors/${sensorId}`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
@@ -130,11 +140,12 @@ const EditSensor = ({ props }) => {
             }}
           />
           <TextField
-            required
+            key={dataSensor.organization_id}
+            disabled={true}
             label="organization_id"
             fullWidth
             margin="normal"
-            value={dataSensor.organization_id}
+            value={dataSensor.organization_name}
             onChange={(event) => {
               setDataSensor({
                 ...dataSensor,
@@ -222,14 +233,17 @@ const EditSensor = ({ props }) => {
           style={{ marginTop: "16px" }}
         >
           Upload Rules?{" "}
-          <Link
-            component="button"
-            onClick={() => {
-              navigate(`/upload-rules/${sensorId}`);
-            }}
-          >
+          <Link component="button" onClick={handleOpenChildModal}>
             Click Here
           </Link>
+          <Modal
+            open={openChildModal}
+            onClose={handleCloseChildModal}
+            aria-labelledby="modal-child-title"
+            aria-describedby="modal-child-description"
+          >
+            <UploadRules />
+          </Modal>
         </Typography>
       </CardContent>
     </Card>

@@ -11,6 +11,8 @@ import { useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
+const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
+
 const CreateAsset = () => {
   const [dataAsset, setDataAsset] = useState({
     name: "",
@@ -38,7 +40,7 @@ const CreateAsset = () => {
     };
 
     axios
-      .post("http://127.0.0.1:8001/api/assets/register", dataAssetSubmit, {
+      .post(`${urlGateway}/assets/register`, dataAssetSubmit, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },

@@ -14,6 +14,9 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
+const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
+
 const ProfilePage = () => {
   const [userData, setUserData] = useState([]);
   const accessToken = Cookies.get("access_token");
@@ -22,7 +25,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8001/api/users/${id}`, {
+      .get(`${urlGateway}/users/${id}`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },

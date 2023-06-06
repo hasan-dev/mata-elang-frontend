@@ -4,6 +4,8 @@ import { useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
+const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
+
 const CreateOrganization = () => {
   const [dataOrganization, setDataOrganization] = useState({
     name: "",
@@ -36,15 +38,11 @@ const CreateOrganization = () => {
     };
 
     axios
-      .post(
-        "http://127.0.0.1:8001/api/Organizations/create",
-        dataOrganizationSubmit,
-        {
-          headers: {
-            Authorization: "Bearer " + accessToken,
-          },
-        }
-      )
+      .post(`${urlGateway}/Organizations/create`, dataOrganizationSubmit, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
       .then(function (response) {
         console.log(response.status, response.data);
         navigate("/login");
