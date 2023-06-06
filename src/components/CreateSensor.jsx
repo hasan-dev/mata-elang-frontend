@@ -29,7 +29,8 @@ const CreateSensor = () => {
     oinkcode: "",
   });
   const [organizationDatas, setOrganizationDatas] = useState([{}]);
-
+  // const organiza
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState("");
   const accessToken = Cookies.get("access_token");
   const userId = Cookies.get("user_id");
   const navigate = useNavigate();
@@ -37,6 +38,10 @@ const CreateSensor = () => {
   if (!accessToken) {
     navigate("/all-sensor");
   }
+
+  const handleOrganizationChange = (selectedOrgId) => {
+    setDataSensor({ ...dataSensor, organization_id: selectedOrgId });
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -48,7 +53,7 @@ const CreateSensor = () => {
       mqtt_topic: dataSensor.mqtt_topic,
       network_interface: dataSensor.network_interface,
       protected_subnet: dataSensor.protected_subnet,
-      organization_id: dataSensor.organization_id,
+      organization_id: selectedOrganizationId,
       external_subnet: dataSensor.external_subnet,
       oinkcode: dataSensor.oinkcode,
     };
@@ -60,8 +65,8 @@ const CreateSensor = () => {
         },
       })
       .then(function (response) {
-        console.log(response.status, response.data);
-        navigate("/dashboard");
+        console.log(response.data);
+        navigate("/dashboard/all-sensor");
       })
       .catch(function (error) {
         console.log(error);
@@ -88,6 +93,7 @@ const CreateSensor = () => {
           navigate("/login");
         }
         setOrganizationDatas(organizationDatas);
+        setSelectedOrganizationId(organizationDatas[0].id);
       })
       .catch(function (error) {
         console.log(error);
@@ -133,23 +139,7 @@ const CreateSensor = () => {
                 setDataSensor({ ...dataSensor, name: event.target.value });
               }}
             />
-            {organizationDatas.map((org) => (
-              <TextField
-                key={org.id}
-                disabled={true}
-                label="organization"
-                fullWidth
-                margin="normal"
-                value={org.name}
-                onChange={(event) => {
-                  setDataSensor({
-                    ...dataSensor,
-                    organization_id: org.id,
-                  });
-                }}
-              />
-            ))}
-            {console.log(organizationDatas)}
+
             <TextField
               label="external_subnet"
               fullWidth
