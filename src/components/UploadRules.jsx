@@ -15,7 +15,7 @@ import { useParams } from "react-router-dom";
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
 const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
-const UploadRules = ({ props }) => {
+const UploadRules = ({ sensorId, handleCloseUpload }) => {
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleFileChange = (event) => {
@@ -27,10 +27,10 @@ const UploadRules = ({ props }) => {
     formData.append("file", selectedFile);
 
     axios
-      .post(`${urlSensor}/sensors/update_rule/${props}`, formData)
+      .post(`${urlSensor}/sensors/update_rule/${sensorId}`, formData)
       .then((response) => {
         console.log(response);
-        // Lakukan tindakan lain setelah upload berhasil
+        handleCloseUpload(sensorId);
       })
       .catch((error) => {
         console.error("Error uploading file:", error);

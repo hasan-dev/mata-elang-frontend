@@ -18,7 +18,7 @@ const LoginPage = () => {
     email: "",
     password: "",
   });
-
+  const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
   //   const [email, setEmail] = useState("");
   //   const [password, setPassword] = useState("");
   //   const [error, setError] = useState("");
@@ -26,7 +26,7 @@ const LoginPage = () => {
   const postLogin = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:8001/api/users/login", dataLogin)
+      .post(`${urlGateway}/users/login`, dataLogin)
       .then(function (response) {
         console.log(response);
         if (response.status === 200) {
@@ -65,16 +65,14 @@ const LoginPage = () => {
   return (
     <div style={{ display: "flex", justifyContent: "center", marginTop: 50 }}>
       <Card style={{ width: 400 }}>
-      <CardHeader
-        avatar={
-          <Avatar src="/logo.jpeg"  sx={{ width: 64, height: 64 }}/>
-        }
-        title={
-          <Typography variant="h4" my="auto" mr={4}>
-            Mata Elang
-          </Typography>
-        }
-      />
+        <CardHeader
+          avatar={<Avatar src="/logo.jpeg" sx={{ width: 64, height: 64 }} />}
+          title={
+            <Typography variant="h4" my="auto" mr={4}>
+              Mata Elang
+            </Typography>
+          }
+        />
         <CardContent>
           <form onSubmit={postLogin}>
             <TextField

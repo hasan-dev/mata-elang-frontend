@@ -131,7 +131,7 @@ const ChartSensor = () => {
   }, []);
 
   useEffect(() => {
-    // console.log(sensorCounts)
+    console.log(sensorCounts);
     const newData = [
       { x: "Active", y: sensorCounts.active },
       { x: "Deactive", y: sensorCounts.nonActive },
@@ -185,7 +185,7 @@ const ChartSensor = () => {
           </TextField>
         </Box>
         <Box
-          maxWidth={500}
+          // maxWidth={500}
           sx={{
             mx: "auto",
             my: 0,
@@ -194,12 +194,12 @@ const ChartSensor = () => {
           <VictoryPie
             data={data}
             colorScale={["tomato", "orange", "gold", "cyan", "navy"]}
-            width={450}
-            innerRadius={({ datum }) => datum.y * 20}
-            radius={({ datum }) => 80 + datum.y * 20}
+            width={500}
+            // innerRadius={({ datum }) => datum.y * 20}
+            // radius={({ datum }) => 80 + datum.y * 20}
             labels={({ datum }) => `${datum.x}: ${datum.y}`}
             labelPosition="centroid"
-            labelPlacement={({ index }) => (index ? "parallel" : "vertical")}
+            labelPlacement="vertical"
           />
         </Box>
         <Box
@@ -209,9 +209,11 @@ const ChartSensor = () => {
         >
           <Grid container spacing={2} direction="row">
             <Grid item xs={2}>
-              <Button variant="outlined" onClick={displayLog}>
-                Show Log
-              </Button>
+              {selectedOption && (
+                <Button variant="outlined" onClick={displayLog}>
+                  Show Log
+                </Button>
+              )}
             </Grid>
             <Grid item xs={8}>
               <Typography>Sensor Heartbeat Log</Typography>
@@ -242,25 +244,30 @@ const ChartSensor = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {dataLog.map((row) => (
-                  <StyledTableRow key={row.id}>
-                    <StyledTableCell component="th" scope="row">
-                      {row.uuid}
-                    </StyledTableCell>
-                    <StyledTableCell component="th" scope="row">
-                      {row.name}
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      {row.status}
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      {row.last_seen}
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      {row.created_at}
-                    </StyledTableCell>
-                  </StyledTableRow>
-                ))}
+                {dataLog.map(
+                  (row) => (
+                    console.log(row.isActive),
+                    (
+                      <StyledTableRow key={row.id}>
+                        <StyledTableCell component="th" scope="row">
+                          {row.uuid}
+                        </StyledTableCell>
+                        <StyledTableCell component="th" scope="row">
+                          {row.name}
+                        </StyledTableCell>
+                        <StyledTableCell align="right">
+                          {row.isActive ? "Active" : "Non-Active"}
+                        </StyledTableCell>
+                        <StyledTableCell align="right">
+                          {row.last_seen}
+                        </StyledTableCell>
+                        <StyledTableCell align="right">
+                          {row.created_at}
+                        </StyledTableCell>
+                      </StyledTableRow>
+                    )
+                  )
+                )}
               </TableBody>
             </Table>
           </TableContainer>

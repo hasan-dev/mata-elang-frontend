@@ -95,7 +95,7 @@ const ProfilePage = () => {
           </Card>
         </Box>
 
-        <Box>
+        {/* <Box>
           <Card
             sx={{
               boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
@@ -187,7 +187,7 @@ const ProfilePage = () => {
                 ))}
             </CardContent>
           </Card>
-        </Box>
+        </Box> */}
       </Box>
     </>
   );

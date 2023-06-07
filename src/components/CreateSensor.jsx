@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
 const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
-const CreateSensor = () => {
+const CreateSensor = ({ handleCloseAdd }) => {
   const [dataSensor, setDataSensor] = useState({
     id: "",
     name: "",
@@ -66,7 +66,8 @@ const CreateSensor = () => {
       })
       .then(function (response) {
         console.log(response.data);
-        navigate("/dashboard/all-sensor");
+        handleCloseAdd();
+        // navigate("/dashboard/all-sensor");
       })
       .catch(function (error) {
         console.log(error);

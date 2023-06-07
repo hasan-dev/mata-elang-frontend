@@ -68,15 +68,48 @@ export default function AllSensor() {
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoadingOrganization, setIsLoadingOrganization] = useState(true);
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
-  const [openUpload, setOpenUpload] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  // const [openUpload, setOpenUpload] = useState(false);
+  // const handleOpen = () => setOpen(true);
+  // const handleClose = () => setOpen(false);
   const handleOpenAdd = () => setOpenAdd(true);
   const handleCloseAdd = () => setOpenAdd(false);
-  const handleOpenUpload = () => setOpenUpload(true);
-  const handleCloseUpload = () => setOpenUpload(false);
+  // const handleOpenUpload = () => setOpenUpload(true);
+  // const handleCloseUpload = () => setOpenUpload(false);
+  const [deletionFlag, setDeletionFlag] = useState(false);
+  const [myKey, setMyKey] = useState(0);
+
+  const [open, setOpen] = useState({});
+  const [openUpload, setOpenUpload] = useState({});
+
+  const handleOpen = (sensorId) => {
+    setOpen((prevState) => ({
+      ...prevState,
+      [sensorId]: true,
+    }));
+  };
+
+  const handleClose = (sensorId) => {
+    setOpen((prevState) => ({
+      ...prevState,
+      [sensorId]: false,
+    }));
+  };
+
+  const handleOpenUpload = (sensorId) => {
+    setOpenUpload((prevState) => ({
+      ...prevState,
+      [sensorId]: true,
+    }));
+  };
+
+  const handleCloseUpload = (sensorId) => {
+    setOpenUpload((prevState) => ({
+      ...prevState,
+      [sensorId]: false,
+    }));
+  };
 
   const handleDeleteSensor = (sensorId) => {
     axios
@@ -86,7 +119,8 @@ export default function AllSensor() {
         },
       })
       .then(function (response) {
-        navigate("/dashboard/all-sensor");
+        // navigate("/dashboard/all-sensor");
+        setDeletionFlag(!deletionFlag);
       })
       .catch(function (error) {
         console.log(error);
@@ -95,6 +129,7 @@ export default function AllSensor() {
 
   const selectOrganization = (event) => {
     const selectedValue = event.target.value;
+    setMyKey(event.target.value);
     if (!selectedValue) {
       setSensorData([]);
       setSelectedOption("");
@@ -104,23 +139,24 @@ export default function AllSensor() {
       return;
     }
     setSelectedOption(selectedValue);
-    console.log("Selected Value:", selectedValue);
-    axios
-      .get(`${urlGateway}/organizations/${selectedValue}/sensors/all`, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
-      .then(function (response) {
-        console.log(response.data.data);
-        if (!accessToken) {
-          navigate("/login");
-        }
-        setSensorData(response.data.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    // console.log("Selected Value:", selectedValue);
+    // axios
+    //   .get(`${urlGateway}/organizations/${selectedValue}/sensors/all`, {
+    //     headers: {
+    //       Authorization: "Bearer " + accessToken,
+    //     },
+    //   })
+    //   .then(function (response) {
+    //     console.log(response.data.data);
+    //     if (!accessToken) {
+    //       navigate("/login");
+    //     }
+    //     setSensorData(response.data.data);
+    //     // setDeletionFlag(!deletionFlag);
+    //   })
+    //   .catch(function (error) {
+    //     console.log(error);
+    //   });
   };
 
   useEffect(() => {
@@ -151,6 +187,26 @@ export default function AllSensor() {
         console.log(error);
       });
   }, []);
+
+  useEffect(() => {
+    axios
+      .get(`${urlGateway}/organizations/${myKey}/sensors/all`, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
+      .then(function (response) {
+        console.log(response.data.data);
+        if (!accessToken) {
+          navigate("/login");
+        }
+        setSensorData(response.data.data);
+        // setDeletionFlag(!deletionFlag);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, [myKey, deletionFlag]);
 
   return (
     <>
@@ -209,7 +265,7 @@ export default function AllSensor() {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
               >
-                <CreateSensor />
+                <CreateSensor handleCloseAdd={handleCloseAdd} />
               </Modal>
             </Box>
           </Box>
@@ -226,7 +282,7 @@ export default function AllSensor() {
                 alignContent: "center",
               }}
             >
-              <Table sx={{ maxWidth: 800 }} aria-label="customized table">
+              <Table sx={{ maxWidth: 950 }} aria-label="customized table">
                 <TableHead>
                   <TableRow>
                     <StyledTableCell>ID</StyledTableCell>
@@ -287,6 +343,7 @@ export default function AllSensor() {
                         <Button
                           variant="outlined"
                           color="error"
+                          sensorData
                           startIcon={<DeleteIcon />}
                           onClick={() => handleDeleteSensor(row.id)}
                         >
@@ -295,35 +352,39 @@ export default function AllSensor() {
                         <Button
                           variant="contained"
                           endIcon={<EditIcon />}
-                          onClick={handleOpen}
+                          onClick={() => handleOpen(row.id)}
                         >
                           Edit
                         </Button>
                         <Modal
-                          open={open}
-                          onClose={handleClose}
+                          open={open[row.id] || false}
+                          onClose={() => handleClose(row.id)}
                           aria-labelledby="modal-modal-title"
                           aria-describedby="modal-modal-description"
                         >
                           <EditSensor
                             sensorData={sensorData}
                             sensorId={row.id}
+                            handleClose={handleClose}
                           />
                         </Modal>
                         <Button
                           variant="outlined"
                           endIcon={<UploadFileIcon />}
-                          onClick={handleOpenUpload}
+                          onClick={() => handleOpenUpload(row.id)}
                         >
                           Rules
                         </Button>
                         <Modal
-                          open={openUpload}
-                          onClose={handleCloseUpload}
+                          open={openUpload[row.id] || false}
+                          onClose={() => handleCloseUpload(row.id)}
                           aria-labelledby="modal-modal-title"
                           aria-describedby="modal-modal-description"
                         >
-                          <UploadRules props={row.id} />
+                          <UploadRules
+                            sensorId={row.id}
+                            handleCloseUpload={handleCloseUpload}
+                          />
                         </Modal>
                       </Stack>
                     </StyledTableRow>
@@ -361,7 +422,7 @@ export default function AllSensor() {
                   <CheckCircleOutlineIcon />
                 </Avatar>
               </ListItemAvatar>
-              <ListItemText primary="" />
+              <ListItemText primary="Install Docker Engine: Install Docker Engine by following the instructions provided on the official Docker website: https://docs.docker.com/get-docker/" />
             </ListItem>
             <ListItem>
               <ListItemAvatar>
@@ -369,7 +430,7 @@ export default function AllSensor() {
                   <CheckCircleOutlineIcon />
                 </Avatar>
               </ListItemAvatar>
-              <ListItemText primary="Work" />
+              <ListItemText primary="Install Docker Compose: After installing Docker Engine, proceed to install Docker Compose. You can find installation instructions for Docker Compose on the official Docker website: https://docs.docker.com/compose/install/" />
             </ListItem>
             <ListItem>
               <ListItemAvatar>
@@ -377,7 +438,23 @@ export default function AllSensor() {
                   <CheckCircleOutlineIcon />
                 </Avatar>
               </ListItemAvatar>
-              <ListItemText primary="Vacation" />
+              <ListItemText primary="Clone Sensor Repository: Clone the repository by running the following command in your terminal: git clone https://github.com/kurous2/sensor-TA.git" />
+            </ListItem>
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar>
+                  <CheckCircleOutlineIcon />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText primary="Run Script: Navigate to the cloned repository directory and execute the run.sh script. If needed, use sudo to run it with superuser privileges. The command will be: ./run.sh" />
+            </ListItem>
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar>
+                  <CheckCircleOutlineIcon />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText primary="Test Sensor: Once the installation is complete, you can test the sensor by simulating attacks." />
             </ListItem>
           </List>
         </Box>

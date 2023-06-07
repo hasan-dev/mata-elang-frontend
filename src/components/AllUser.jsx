@@ -44,9 +44,27 @@ export default function AllUser() {
   const [organizationData, setOrganizationData] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoadingOrganization, setIsLoadingOrganization] = useState(true);
+  const [deletionFlag, setDeletionFlag] = useState(false);
+  const [OrgId, setOrgId] = useState(0);
+
+  const handleDeleteUser = (userId) => {
+    axios
+      .delete(`${urlGateway}/users/delete/${userId}`, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
+      .then(function (response) {
+        setDeletionFlag(!deletionFlag);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
 
   const selectOrganization = (event) => {
     const selectedValue = event.target.value;
+    setOrgId(event.target.value);
     if (!selectedValue) {
       setuserData([]);
       setSelectedOption("");
@@ -56,23 +74,23 @@ export default function AllUser() {
       return;
     }
     setSelectedOption(selectedValue);
-    console.log("Selected Value:", selectedValue);
-    axios
-      .get(`${urlGateway}/organizations/${selectedValue}/users/all`, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
-      .then(function (response) {
-        console.log(response.data.data);
-        if (!accessToken) {
-          navigate("/login");
-        }
-        setuserData(response.data.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    // console.log("Selected Value:", selectedValue);
+    // axios
+    //   .get(`${urlGateway}/organizations/${selectedValue}/users/all`, {
+    //     headers: {
+    //       Authorization: "Bearer " + accessToken,
+    //     },
+    //   })
+    //   .then(function (response) {
+    //     console.log(response.data.data);
+    //     if (!accessToken) {
+    //       navigate("/login");
+    //     }
+    //     setuserData(response.data.data);
+    //   })
+    //   .catch(function (error) {
+    //     console.log(error);
+    //   });
   };
 
   useEffect(() => {
@@ -103,6 +121,25 @@ export default function AllUser() {
         console.log(error);
       });
   }, []);
+
+  useEffect(() => {
+    axios
+      .get(`${urlGateway}/organizations/${OrgId}/users/all`, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
+      .then(function (response) {
+        console.log(response.data.data);
+        if (!accessToken) {
+          navigate("/login");
+        }
+        setuserData(response.data.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, [OrgId, deletionFlag]);
 
   return (
     <>
@@ -207,6 +244,7 @@ export default function AllUser() {
                         variant="outlined"
                         color="error"
                         startIcon={<DeleteIcon />}
+                        onClick={() => handleDeleteUser(row.id)}
                       >
                         Delete
                       </Button>

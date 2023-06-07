@@ -61,9 +61,27 @@ export default function AllAsset() {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const [deletionFlag, setDeletionFlag] = useState(false);
+  const [OrgId, setOrgId] = useState(0);
+
+  const handleDeleteAsset = (assetId) => {
+    axios
+      .delete(`${urlGateway}/assets/delete/${assetId}`, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
+      .then(function (response) {
+        setDeletionFlag(!deletionFlag);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
 
   const selectOrganization = (event) => {
     const selectedValue = event.target.value;
+    setOrgId(event.target.value);
     if (!selectedValue) {
       setAssetData([]);
       setSelectedOption("");
@@ -73,23 +91,23 @@ export default function AllAsset() {
       return;
     }
     setSelectedOption(selectedValue);
-    console.log("Selected Value:", selectedValue);
-    axios
-      .get(`${urlGateway}/organizations/${selectedValue}/assets/all`, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
-      .then(function (response) {
-        console.log(response.data.data);
-        if (!accessToken) {
-          navigate("/login");
-        }
-        setAssetData(response.data.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    // console.log("Selected Value:", selectedValue);
+    // axios
+    //   .get(`${urlGateway}/organizations/${selectedValue}/assets/all`, {
+    //     headers: {
+    //       Authorization: "Bearer " + accessToken,
+    //     },
+    //   })
+    //   .then(function (response) {
+    //     console.log(response.data.data);
+    //     if (!accessToken) {
+    //       navigate("/login");
+    //     }
+    //     setAssetData(response.data.data);
+    //   })
+    //   .catch(function (error) {
+    //     console.log(error);
+    //   });
   };
 
   useEffect(() => {
@@ -120,6 +138,25 @@ export default function AllAsset() {
         console.log(error);
       });
   }, []);
+
+  useEffect(() => {
+    axios
+      .get(`${urlGateway}/organizations/${OrgId}/assets/all`, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
+      .then(function (response) {
+        console.log(response.data.data);
+        if (!accessToken) {
+          navigate("/login");
+        }
+        setAssetData(response.data.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, [OrgId, deletionFlag]);
 
   return (
     <>
@@ -227,6 +264,7 @@ export default function AllAsset() {
                         variant="outlined"
                         color="error"
                         startIcon={<DeleteIcon />}
+                        onClick={() => handleDeleteAsset(row.id)}
                       >
                         Delete
                       </Button>

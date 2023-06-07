@@ -57,9 +57,27 @@ export default function AllRole() {
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoadingOrganization, setIsLoadingOrganization] = useState(true);
   const [selectedNames, setSelectedNames] = useState([]);
+  const [deletionFlag, setDeletionFlag] = useState(false);
+  const [OrgId, setOrgId] = useState(0);
+
+  const handleDeleteRole = (roleId) => {
+    axios
+      .delete(`${urlGateway}/roles/delete/${roleId}`, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
+      .then(function (response) {
+        setDeletionFlag(!deletionFlag);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
 
   const selectOrganization = (event) => {
     const selectedValue = event.target.value;
+    setOrgId(event.target.value);
     if (!selectedValue) {
       setRoleData([]);
       setSelectedOption("");
@@ -70,24 +88,24 @@ export default function AllRole() {
     }
     setSelectedOption(selectedValue);
     // console.log("Selected Value:", selectedValue);
-    axios
-      .get(`${urlGateway}/organizations/${selectedValue}/roles/all`, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
-      .then(function (response) {
-        console.log(response.data.data);
-        const roles = response.data.data;
-        if (!accessToken) {
-          navigate("/login");
-        }
-        console.log(roles);
-        setRoleData(roles);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    // axios
+    //   .get(`${urlGateway}/organizations/${selectedValue}/roles/all`, {
+    //     headers: {
+    //       Authorization: "Bearer " + accessToken,
+    //     },
+    //   })
+    //   .then(function (response) {
+    //     console.log(response.data.data);
+    //     const roles = response.data.data;
+    //     if (!accessToken) {
+    //       navigate("/login");
+    //     }
+    //     console.log(roles);
+    //     setRoleData(roles);
+    //   })
+    //   .catch(function (error) {
+    //     console.log(error);
+    //   });
   };
 
   useEffect(() => {
@@ -118,6 +136,27 @@ export default function AllRole() {
         console.log(error);
       });
   }, []);
+
+  useEffect(() => {
+    axios
+      .get(`${urlGateway}/organizations/${OrgId}/roles/all`, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
+      .then(function (response) {
+        console.log(response.data.data);
+        const roles = response.data.data;
+        if (!accessToken) {
+          navigate("/login");
+        }
+        console.log(roles);
+        setRoleData(roles);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, [OrgId, deletionFlag]);
 
   return (
     <>
@@ -214,11 +253,12 @@ export default function AllRole() {
                         variant="outlined"
                         color="error"
                         startIcon={<DeleteIcon />}
+                        onClick={() => handleDeleteRole(row.id)}
                       >
                         Delete
                       </Button>
                       <Button variant="contained" endIcon={<EditIcon />}>
-                        Edit Role
+                        Edit
                       </Button>
                     </Stack>
                   </StyledTableRow>
