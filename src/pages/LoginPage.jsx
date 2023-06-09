@@ -30,14 +30,12 @@ const LoginPage = () => {
       .then(function (response) {
         console.log(response);
         if (response.status === 200) {
-          // Simpan access_token ke dalam cookie
           Cookies.set("access_token", response.data.access_token);
           Cookies.set("user_id", response.data.data.id);
+          Cookies.set("organization_id", response.data.data.organization[0].id);
 
-          // Lanjutkan ke halaman selanjutnya
           navigate("/dashboard");
         } else {
-          // Tampilkan pesan error
           console.log(response.data.message);
         }
       })
@@ -45,21 +43,6 @@ const LoginPage = () => {
         console.log(error);
       });
   };
-
-  //   const handleSubmit = (event) => {
-  // event.preventDefault          </Route>();
-
-  //     axios
-  //       .post("http://localhost:8001/api/users/login", { email, password })
-  //       .then((response) => {
-  //         // handle successful login here
-  //         console.log(response);
-  //       })
-  //       .catch((error) => {
-  //         setError("Invalid email or password.");
-  //         console.log(error);
-  //       });
-  //   };
 
   //   console.log(dataLogin);
   return (

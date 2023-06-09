@@ -51,51 +51,45 @@ const ProfilePage = () => {
       <Box
         sx={{
           display: "flex",
+          bgcolor: "background.paper",
+          border: 1,
+          borderColor: "grey.500",
           flexDirection: "column",
-          my: 8,
-          p: 2,
+          justifyContent: "center",
+          alignContent: "center",
+          borderRadius: "16px",
+          boxShadow: 3,
+          mt: 10,
         }}
       >
-        <Box
-          sx={{
-            mx: "auto",
-            my: 2,
-          }}
-        >
-          <Card sx={{ maxWidth: 345 }}>
-            <CardActionArea>
-              <CardMedia
-                component="img"
-                height="140"
-                image={userData.photo}
-                alt={userData.name}
-              />
-              <CardContent>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle1">Name:</Typography>
-                    <Typography>{userData.name}</Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle1">Email:</Typography>
-                    <Typography>{userData.email}</Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle1">Phone Number:</Typography>
-                    <Typography>{userData.phone_number}</Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Button variant="contained" color="primary">
-                      Edit Profile
-                    </Button>
-                  </Grid>
+        <Card sx={{ maxWidth: 345 }}>
+          <CardActionArea>
+            <CardContent>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1">Name:</Typography>
+                  <Typography>{userData.name}</Typography>
                 </Grid>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Box>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1">Email:</Typography>
+                  <Typography>{userData.email}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1">Phone Number:</Typography>
+                  <Typography>{userData.phone_number}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Button variant="contained" color="primary">
+                    Edit Profile
+                  </Button>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </CardActionArea>
+        </Card>
+      </Box>
 
-        {/* <Box>
+      {/* <Box>
           <Card
             sx={{
               boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
@@ -188,7 +182,6 @@ const ProfilePage = () => {
             </CardContent>
           </Card>
         </Box> */}
-      </Box>
     </>
   );
 };

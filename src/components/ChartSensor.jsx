@@ -3,7 +3,9 @@ import axios from "axios";
 import {
   Box,
   Button,
+  Chip,
   Container,
+  Divider,
   Grid,
   Paper,
   Table,
@@ -11,6 +13,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   TextField,
   Typography,
@@ -61,41 +64,37 @@ const ChartSensor = () => {
   const [organizationData, setOrganizationData] = useState([]);
   const accessToken = Cookies.get("access_token");
   const userId = Cookies.get("user_id");
+  const organizationId = Cookies.get("organization_id");
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState("");
   const [data, setData] = useState([]);
   const [dataLog, setDataLog] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
+  const columns = [
+    { id: "uuid", label: "UUID" },
+    { id: "name", label: "Name" },
+    { id: "isActive", label: "isActive" },
+    { id: "last_seen", label: "Last Seen" },
+    { id: "created_at", label: "Created At" },
+  ];
 
   const displayLog = () => {
     console.log(selectedOption);
     axios
-      .get(`${urlSensor}/log/${selectedOption}`)
+      .get(`${urlSensor}/log/${organizationId}`)
       .then((response) => {
-        // console.log(response);
-
         setDataLog(response.data.data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  };
-
-  const selectOrganization = (event) => {
-    const selectedValue = event.target.value;
-    if (!selectedValue) {
-      setSensorCounts([]);
-      setSelectedOption("");
-      return;
-    }
-    if (selectedValue === selectedOption) {
-      return;
-    }
-    setSelectedOption(selectedValue);
-    axios
-      .get(`${urlSensor}/test/${selectedValue}`)
-      .then((response) => {
-        // console.log(response);
-        setSensorCounts(response.data);
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -104,29 +103,13 @@ const ChartSensor = () => {
 
   useEffect(() => {
     axios
-      .get(`${urlGateway}/users/${userId}`, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
+      .get(`${urlSensor}/test/${organizationId}`)
+      .then((response) => {
+        // console.log(response);
+        setSensorCounts(response.data);
       })
-      .then(function (response) {
-        console.log(response.data.data);
-        const organizationDatas = response.data.data.organization.map(
-          (org) => ({
-            id: org.id,
-            name: org.name,
-          })
-        );
-
-        if (!accessToken) {
-          navigate("/login");
-        }
-
-        setOrganizationData(organizationDatas);
-        console.log(organizationDatas);
-      })
-      .catch(function (error) {
-        console.log(error);
+      .catch((error) => {
+        console.error("Error:", error);
       });
   }, []);
 
@@ -136,8 +119,6 @@ const ChartSensor = () => {
       { x: "Active", y: sensorCounts.active },
       { x: "Deactive", y: sensorCounts.nonActive },
     ];
-
-    // Menghapus item dengan nilai 0
     const filteredData = newData.filter((item) => item.y !== 0);
 
     setData(filteredData);
@@ -164,28 +145,12 @@ const ChartSensor = () => {
             padding: 3,
           }}
         >
-          <TextField
-            id="list-organization-user"
-            select
-            label="Select Organization"
-            defaultValue={selectedOption}
-            value={selectedOption}
-            onChange={selectOrganization}
-            SelectProps={{
-              native: true,
-            }}
-            helperText="Please select your organization"
-          >
-            <option value=""></option>
-            {organizationData.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.name}
-              </option>
-            ))}
-          </TextField>
+          <Box>
+            <Typography variant="h4">Sensor Status Chart</Typography>
+          </Box>
         </Box>
+
         <Box
-          // maxWidth={500}
           sx={{
             mx: "auto",
             my: 0,
@@ -195,8 +160,6 @@ const ChartSensor = () => {
             data={data}
             colorScale={["tomato", "orange", "gold", "cyan", "navy"]}
             width={500}
-            // innerRadius={({ datum }) => datum.y * 20}
-            // radius={({ datum }) => 80 + datum.y * 20}
             labels={({ datum }) => `${datum.x}: ${datum.y}`}
             labelPosition="centroid"
             labelPlacement="vertical"
@@ -209,14 +172,18 @@ const ChartSensor = () => {
         >
           <Grid container spacing={2} direction="row">
             <Grid item xs={2}>
-              {selectedOption && (
-                <Button variant="outlined" onClick={displayLog}>
-                  Show Log
-                </Button>
-              )}
+              <Button variant="outlined" onClick={displayLog}>
+                Show Log
+              </Button>
             </Grid>
             <Grid item xs={8}>
-              <Typography>Sensor Heartbeat Log</Typography>
+              <Divider
+                sx={{
+                  px: 10,
+                }}
+              >
+                <Chip label="Sensor Heartbeat Log" />
+              </Divider>
             </Grid>
           </Grid>
         </Box>
@@ -236,41 +203,50 @@ const ChartSensor = () => {
             <Table sx={{ minWidth: 700 }} aria-label="customized table">
               <TableHead>
                 <TableRow>
-                  <StyledTableCell>UUID</StyledTableCell>
-                  <StyledTableCell align="right">Name</StyledTableCell>
-                  <StyledTableCell align="right">Status</StyledTableCell>
-                  <StyledTableCell align="right">Last Seen</StyledTableCell>
-                  <StyledTableCell align="right">Created At</StyledTableCell>
+                  {columns.map((column) => (
+                    <TableCell
+                      key={column.id}
+                      align={column.align}
+                      style={{ minWidth: column.minWidth }}
+                    >
+                      {column.label}
+                    </TableCell>
+                  ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {dataLog.map(
-                  (row) => (
-                    console.log(row.isActive),
-                    (
-                      <StyledTableRow key={row.id}>
-                        <StyledTableCell component="th" scope="row">
-                          {row.uuid}
-                        </StyledTableCell>
-                        <StyledTableCell component="th" scope="row">
-                          {row.name}
-                        </StyledTableCell>
-                        <StyledTableCell align="right">
-                          {row.isActive ? "Active" : "Non-Active"}
-                        </StyledTableCell>
-                        <StyledTableCell align="right">
-                          {row.last_seen}
-                        </StyledTableCell>
-                        <StyledTableCell align="right">
-                          {row.created_at}
-                        </StyledTableCell>
-                      </StyledTableRow>
-                    )
-                  )
-                )}
+                {dataLog
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                      {columns.map((column) => {
+                        const value = row[column.id];
+                        return (
+                          <TableCell key={column.id}>
+                            {typeof value === "number"
+                              ? column.format(value)
+                              : column.id === "isActive"
+                              ? value
+                                ? "Active"
+                                : "Non-Active"
+                              : value}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 100]}
+            component="div"
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </Box>
       </Box>
     </>

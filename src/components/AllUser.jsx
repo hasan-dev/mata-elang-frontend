@@ -6,13 +6,25 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Box, Button, Grid, Stack, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  Divider,
+  Grid,
+  Modal,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
+import CreateUser from "./CreateUser";
+import EditUser from "./EditUser";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -41,11 +53,32 @@ export default function AllUser() {
   const accessToken = Cookies.get("access_token");
   const navigate = useNavigate();
   const userId = Cookies.get("user_id");
+  const organizationId = Cookies.get("organization_id");
   const [organizationData, setOrganizationData] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoadingOrganization, setIsLoadingOrganization] = useState(true);
   const [deletionFlag, setDeletionFlag] = useState(false);
   const [OrgId, setOrgId] = useState(0);
+  const [openAdd, setOpenAdd] = useState(false);
+  const handleOpenAdd = () => setOpenAdd(true);
+  const handleCloseAdd = () => setOpenAdd(false);
+  // const [deletionFlag, setDeletionFlag] = useState(false);
+  const [myKey, setMyKey] = useState(0);
+  const [openEdit, setOpenEdit] = useState(false);
+
+  const handleOpenEdit = (userId) => {
+    setOpenEdit((prevState) => ({
+      ...prevState,
+      [userId]: true,
+    }));
+  };
+
+  const handleCloseEdit = (userId) => {
+    setOpenEdit((prevState) => ({
+      ...prevState,
+      [userId]: false,
+    }));
+  };
 
   const handleDeleteUser = (userId) => {
     axios
@@ -62,37 +95,6 @@ export default function AllUser() {
       });
   };
 
-  const selectOrganization = (event) => {
-    const selectedValue = event.target.value;
-    setOrgId(event.target.value);
-    if (!selectedValue) {
-      setuserData([]);
-      setSelectedOption("");
-      return;
-    }
-    if (selectedValue === selectedOption) {
-      return;
-    }
-    setSelectedOption(selectedValue);
-    // console.log("Selected Value:", selectedValue);
-    // axios
-    //   .get(`${urlGateway}/organizations/${selectedValue}/users/all`, {
-    //     headers: {
-    //       Authorization: "Bearer " + accessToken,
-    //     },
-    //   })
-    //   .then(function (response) {
-    //     console.log(response.data.data);
-    //     if (!accessToken) {
-    //       navigate("/login");
-    //     }
-    //     setuserData(response.data.data);
-    //   })
-    //   .catch(function (error) {
-    //     console.log(error);
-    //   });
-  };
-
   useEffect(() => {
     axios
       .get(`${urlGateway}/users/${userId}`, {
@@ -102,20 +104,8 @@ export default function AllUser() {
       })
       .then(function (response) {
         console.log(response.data.data);
-        const organizationDatas = response.data.data.organization.map(
-          (org) => ({
-            id: org.id,
-            name: org.name,
-          })
-        );
-
-        if (!accessToken) {
-          navigate("/login");
-        }
-
-        setOrganizationData(organizationDatas);
-        setIsLoadingOrganization(false);
-        console.log(organizationDatas);
+        setuserData(response.data.data);
+        setOrganizationData(response.data.data.organization[0]);
       })
       .catch(function (error) {
         console.log(error);
@@ -124,7 +114,7 @@ export default function AllUser() {
 
   useEffect(() => {
     axios
-      .get(`${urlGateway}/organizations/${OrgId}/users/all`, {
+      .get(`${urlGateway}/organizations/${organizationId}/users/all`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
@@ -139,7 +129,7 @@ export default function AllUser() {
       .catch(function (error) {
         console.log(error);
       });
-  }, [OrgId, deletionFlag]);
+  }, [deletionFlag]);
 
   return (
     <>
@@ -162,35 +152,46 @@ export default function AllUser() {
             p: 3,
           }}
         >
+          {/* <Box display="flex" justifyContent="space-between">
+            <Button onClick={handleOpenAdd}>Add User</Button>
+            <Modal
+              open={openAdd}
+              onClose={handleCloseAdd}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <CreateUser
+                handleCloseAdd={handleCloseAdd}
+                organizationId={organizationId}
+              />
+            </Modal>
+          </Box>
+        </Box> */}
           <Box display="flex" justifyContent="space-between">
-            <TextField
-              id="list-organization-user"
-              select
-              label="Select Organization"
-              defaultValue={selectedOption}
-              value={selectedOption}
-              onChange={selectOrganization}
-              SelectProps={{
-                native: true,
-              }}
-              helperText="Please select your organization"
+            <Typography variant="h5">{organizationData.name} Users</Typography>
+            {console.log(userData)}
+            <Button onClick={handleOpenAdd}>Add User</Button>
+            <Modal
+              open={openAdd}
+              onClose={handleCloseAdd}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
             >
-              <option value=""></option>
-              {organizationData.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.name}
-                </option>
-              ))}
-            </TextField>
-            <Button
-              onClick={() => {
-                console.log("Add User");
-              }}
-            >
-              Add User
-            </Button>
+              <CreateUser
+                handleCloseAdd={handleCloseAdd}
+                organizationId={organizationId}
+              />
+            </Modal>
           </Box>
         </Box>
+        <Divider
+          sx={{
+            px: 10,
+          }}
+        >
+          <Chip label="List of All User" />
+        </Divider>
+
         <Box
           sx={{
             p: 3,
@@ -228,16 +229,19 @@ export default function AllUser() {
                       {row.phone_number}
                     </StyledTableCell>
                     <StyledTableCell align="right">
-                      {row.role.map((role, index) => (
-                        <Typography
-                          key={role.id}
-                          component="span"
-                          display="inline"
-                        >
-                          {role.name}
-                          {index !== row.role.length - 1 && ", "}
-                        </Typography>
-                      ))}
+                      {Array.isArray(row.role) &&
+                        row.role.map((role, index) => (
+                          <Typography
+                            key={role.id}
+                            component="span"
+                            display="inline"
+                          >
+                            {role.name}
+                            {index !== row.role.length - 1 && ", "}
+                          </Typography>
+                        ))}
+
+                      {/* {console.log(row.role)} */}
                     </StyledTableCell>
                     <Stack direction="row" spacing={2} p={2}>
                       <Button
@@ -248,9 +252,25 @@ export default function AllUser() {
                       >
                         Delete
                       </Button>
-                      <Button variant="contained" endIcon={<EditIcon />}>
+                      <Button
+                        variant="contained"
+                        endIcon={<EditIcon />}
+                        onClick={() => handleOpenEdit(row.id)}
+                      >
                         Edit
                       </Button>
+                      <Modal
+                        open={openEdit[row.id] || false}
+                        onClose={() => handleCloseEdit(row.id)}
+                        aria-labelledby="modal-modal-title"
+                        aria-describedby="modal-modal-description"
+                      >
+                        <EditUser
+                          userId={row.id}
+                          handleClose={handleCloseEdit}
+                          organizationId={organizationId}
+                        />
+                      </Modal>
                     </Stack>
                   </StyledTableRow>
                 ))}

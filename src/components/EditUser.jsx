@@ -6,7 +6,6 @@ import {
   Divider,
   InputLabel,
   MenuItem,
-  OutlinedInput,
   Select,
   Stack,
   TextField,
@@ -20,45 +19,18 @@ import CancelIcon from "@mui/icons-material/Cancel";
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
 const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
-export default function CreateRole({ handleCloseAdd }) {
-  const [userData, setuserData] = useState([]);
-  const [dataRole, setDataRole] = useState({
+export default function EditUser({ userId, handleCloseEdit, organizationId }) {
+  const accessToken = Cookies.get("access_token");
+  const [rolesData, setRolesData] = useState([]);
+  const [dataUser, setDataUser] = useState({
     name: "",
     email: "",
-    organization_id: "",
+    password: "",
+    phone_number: "",
+    organization_ids: [],
     role_ids: [],
   });
-  const accessToken = Cookies.get("access_token");
-  const userId = Cookies.get("user_id");
-  const organizationId = Cookies.get("organization_id");
-  const [permissionData, setPermissionData] = useState([]);
-  const [selectedPermission, setselectedPermission] = useState([]);
-  const [organizationData, setOrganizationData] = useState({});
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const dataRoleSubmit = {
-      name: dataRole.name,
-      organization_id: organizationId,
-      permission_ids: selectedPermission,
-    };
-
-    axios
-      .post(`${urlGateway}/roles/create`, dataRoleSubmit, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
-      .then(function (response) {
-        console.log(response.data);
-        if (response.status === "success") {
-          handleCloseAdd();
-        }
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  };
+  const [selectedRoles, setSelectedRoles] = useState([]);
 
   useEffect(() => {
     axios
@@ -68,8 +40,10 @@ export default function CreateRole({ handleCloseAdd }) {
         },
       })
       .then(function (response) {
-        setuserData(response.data.data);
-        setOrganizationData(response.data.data.organization[0]);
+        const user = response.data.data;
+        console.log(user);
+        setDataUser(user);
+        setSelectedRoles(user.role.map((role) => role.id));
       })
       .catch(function (error) {
         console.log(error);
@@ -78,19 +52,47 @@ export default function CreateRole({ handleCloseAdd }) {
 
   useEffect(() => {
     axios
-      .get(`${urlGateway}/permissions/all`, {
+      .get(`${urlGateway}/organizations/${organizationId}/roles/all`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
       })
       .then(function (response) {
-        console.log(response.data.data);
-        setPermissionData(response.data.data);
+        setRolesData(response.data.data);
       })
       .catch(function (error) {
         console.log(error);
       });
   }, []);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const dataUserSubmit = {
+      name: dataUser.name,
+      email: dataUser.email,
+      password: dataUser.password,
+      phone_number: dataUser.phone_number,
+      organization_ids: [organizationId],
+      role_ids: selectedRoles,
+    };
+    console.log(dataUserSubmit);
+    axios
+      .patch(`${urlGateway}/users/update/${userId}`, dataUserSubmit, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
+      .then(function (response) {
+        console.log(response.data);
+        if (response.status === "success") {
+          handleCloseEdit();
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
   return (
     <>
       <Card
@@ -107,7 +109,7 @@ export default function CreateRole({ handleCloseAdd }) {
             marginTop: 2,
           }}
         >
-          Create Role
+          Edit User
         </Typography>
         <Divider variant="middle" />
         <br />
@@ -122,38 +124,68 @@ export default function CreateRole({ handleCloseAdd }) {
             }}
           >
             <TextField
-              label="name"
+              label="Name"
               fullWidth
               margin="normal"
-              value={dataRole.name}
+              value={dataUser.name}
               onChange={(event) => {
-                setDataRole({ ...dataRole, name: event.target.value });
+                setDataUser({ ...dataUser, name: event.target.value });
               }}
             />
+
+            <TextField
+              label="Email"
+              fullWidth
+              margin="normal"
+              type="email"
+              value={dataUser.email}
+              onChange={(event) => {
+                setDataUser({ ...dataUser, email: event.target.value });
+              }}
+            />
+
+            <TextField
+              label="Password"
+              fullWidth
+              margin="normal"
+              type="password"
+              value={dataUser.password}
+              onChange={(event) => {
+                setDataUser({ ...dataUser, password: event.target.value });
+              }}
+            />
+
+            <TextField
+              label="Phone Number"
+              fullWidth
+              margin="normal"
+              value={dataUser.phone_number}
+              onChange={(event) => {
+                setDataUser({ ...dataUser, phone_number: event.target.value });
+              }}
+            />
+
             <InputLabel
               sx={{
                 alignSelf: "flex-start",
               }}
             >
-              Permission
+              Roles
             </InputLabel>
             <Select
               multiple
               fullWidth
-              value={selectedPermission}
-              onChange={(e) => setselectedPermission(e.target.value)}
-              input={<OutlinedInput label="Multiple Select" />}
+              value={selectedRoles}
+              onChange={(e) => setSelectedRoles(e.target.value)}
               renderValue={(selected) => (
                 <Stack gap={1} direction="row" flexWrap="wrap">
                   {selected.map((value) => (
                     <Chip
                       key={value}
-                      label={
-                        permissionData.find((role) => role.id === value)?.name
-                      }
+                      label={rolesData.find((role) => role.id === value)?.name}
                       onDelete={() =>
-                        setselectedPermission(
-                          selectedPermission.filter((item) => item !== value)
+                        setSelectedRoles(
+                          selectedRoles.filter((item) => item !== value)
                         )
                       }
                       deleteIcon={
@@ -166,12 +198,13 @@ export default function CreateRole({ handleCloseAdd }) {
                 </Stack>
               )}
             >
-              {permissionData.map((role) => (
+              {rolesData.map((role) => (
                 <MenuItem key={role.id} value={role.id}>
                   {role.name}
                 </MenuItem>
               ))}
             </Select>
+
             <Button
               variant="contained"
               color="primary"

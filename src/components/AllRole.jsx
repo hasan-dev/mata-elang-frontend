@@ -16,6 +16,8 @@ import {
   Paper,
   Typography,
   Box,
+  Divider,
+  Chip,
 } from "@mui/material";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckIcon from "@mui/icons-material/Check";
@@ -24,6 +26,8 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import CreateRole from "./CreateRole";
+import EditRole from "./EditRole";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -53,12 +57,35 @@ export default function AllRole() {
   const accessToken = Cookies.get("access_token");
   const navigate = useNavigate();
   const userId = Cookies.get("user_id");
+  const organizationId = Cookies.get("organization_id");
   const [organizationData, setOrganizationData] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoadingOrganization, setIsLoadingOrganization] = useState(true);
   const [selectedNames, setSelectedNames] = useState([]);
   const [deletionFlag, setDeletionFlag] = useState(false);
   const [OrgId, setOrgId] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [openAdd, setOpenAdd] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const [userData, setuserData] = useState({});
+  const handleOpenAdd = () => setOpenAdd(true);
+  const handleCloseAdd = () => setOpenAdd(false);
+  const [openEdit, setOpenEdit] = useState(false);
+
+  const handleOpenEdit = (roleId) => {
+    setOpenEdit((prevState) => ({
+      ...prevState,
+      [roleId]: true,
+    }));
+  };
+
+  const handleCloseEdit = (roleId) => {
+    setOpenEdit((prevState) => ({
+      ...prevState,
+      [roleId]: false,
+    }));
+  };
 
   const handleDeleteRole = (roleId) => {
     axios
@@ -75,39 +102,6 @@ export default function AllRole() {
       });
   };
 
-  const selectOrganization = (event) => {
-    const selectedValue = event.target.value;
-    setOrgId(event.target.value);
-    if (!selectedValue) {
-      setRoleData([]);
-      setSelectedOption("");
-      return;
-    }
-    if (selectedValue === selectedOption) {
-      return;
-    }
-    setSelectedOption(selectedValue);
-    // console.log("Selected Value:", selectedValue);
-    // axios
-    //   .get(`${urlGateway}/organizations/${selectedValue}/roles/all`, {
-    //     headers: {
-    //       Authorization: "Bearer " + accessToken,
-    //     },
-    //   })
-    //   .then(function (response) {
-    //     console.log(response.data.data);
-    //     const roles = response.data.data;
-    //     if (!accessToken) {
-    //       navigate("/login");
-    //     }
-    //     console.log(roles);
-    //     setRoleData(roles);
-    //   })
-    //   .catch(function (error) {
-    //     console.log(error);
-    //   });
-  };
-
   useEffect(() => {
     axios
       .get(`${urlGateway}/users/${userId}`, {
@@ -116,21 +110,8 @@ export default function AllRole() {
         },
       })
       .then(function (response) {
-        // console.log(response.data.data);
-        const organizationDatas = response.data.data.organization.map(
-          (org) => ({
-            id: org.id,
-            name: org.name,
-          })
-        );
-
-        if (!accessToken) {
-          navigate("/login");
-        }
-
-        setOrganizationData(organizationDatas);
-        setIsLoadingOrganization(false);
-        // console.log(organizationDatas);
+        setuserData(response.data.data);
+        setOrganizationData(response.data.data.organization[0]);
       })
       .catch(function (error) {
         console.log(error);
@@ -139,24 +120,19 @@ export default function AllRole() {
 
   useEffect(() => {
     axios
-      .get(`${urlGateway}/organizations/${OrgId}/roles/all`, {
+      .get(`${urlGateway}/organizations/${organizationId}/roles/all`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
       })
       .then(function (response) {
-        console.log(response.data.data);
         const roles = response.data.data;
-        if (!accessToken) {
-          navigate("/login");
-        }
-        console.log(roles);
         setRoleData(roles);
       })
       .catch(function (error) {
         console.log(error);
       });
-  }, [OrgId, deletionFlag]);
+  }, [deletionFlag]);
 
   return (
     <>
@@ -177,35 +153,38 @@ export default function AllRole() {
         <Box
           sx={{
             p: 3,
+            display: "flex",
+            justifyContent: "space-between",
           }}
         >
-          <Grid container spacing={2} direction="column">
-            <Grid item>
-              {!isLoadingOrganization && (
-                <TextField
-                  id="list-organization-user"
-                  select
-                  label="Select Organization"
-                  defaultValue={selectedOption}
-                  value={selectedOption}
-                  onChange={selectOrganization}
-                  SelectProps={{
-                    native: true,
-                  }}
-                  helperText="Please select your organization"
-                >
-                  <option value=""></option>
-                  {organizationData.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </TextField>
-              )}
-            </Grid>
-          </Grid>
-        </Box>
+          <Box>
+            <Typography variant="h5">
+              {organizationData.name} User Role
+            </Typography>
+          </Box>
 
+          <Box>
+            <Button onClick={handleOpenAdd}>Add Role</Button>
+            <Modal
+              open={openAdd}
+              onClose={handleCloseAdd}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <CreateRole
+                handleCloseAdd={handleCloseAdd}
+                organizationId={organizationId}
+              />
+            </Modal>
+          </Box>
+        </Box>
+        <Divider
+          sx={{
+            px: 10,
+          }}
+        >
+          <Chip label="List of All Usser Role" />
+        </Divider>
         <Box
           sx={{
             p: 3,
@@ -257,9 +236,25 @@ export default function AllRole() {
                       >
                         Delete
                       </Button>
-                      <Button variant="contained" endIcon={<EditIcon />}>
+                      <Button
+                        variant="contained"
+                        endIcon={<EditIcon />}
+                        onClick={() => handleOpenEdit(row.id)}
+                      >
                         Edit
                       </Button>
+                      <Modal
+                        open={openEdit[row.id] || false}
+                        onClose={() => handleCloseEdit(row.id)}
+                        aria-labelledby="modal-modal-title"
+                        aria-describedby="modal-modal-description"
+                      >
+                        <EditRole
+                          roleId={row.id}
+                          handleClose={handleCloseEdit}
+                          organizationId={organizationId}
+                        />
+                      </Modal>
                     </Stack>
                   </StyledTableRow>
                 ))}

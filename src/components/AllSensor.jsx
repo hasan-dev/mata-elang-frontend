@@ -23,6 +23,8 @@ import {
   Avatar,
   ListItemText,
   Typography,
+  Chip,
+  TablePagination,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
@@ -64,7 +66,8 @@ export default function AllSensor() {
   const [sensorData, setSensorData] = useState([]);
   const accessToken = Cookies.get("access_token");
   const userId = Cookies.get("user_id");
-  const [organizationData, setOrganizationData] = useState([]);
+  const organizationId = Cookies.get("organization_id");
+  // const [organizationData, setOrganizationData] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoadingOrganization, setIsLoadingOrganization] = useState(true);
   const navigate = useNavigate();
@@ -79,9 +82,10 @@ export default function AllSensor() {
   // const handleCloseUpload = () => setOpenUpload(false);
   const [deletionFlag, setDeletionFlag] = useState(false);
   const [myKey, setMyKey] = useState(0);
-
   const [open, setOpen] = useState({});
   const [openUpload, setOpenUpload] = useState({});
+  const [userData, setuserData] = useState({});
+  const [organizationData, setOrganizationData] = useState({});
 
   const handleOpen = (sensorId) => {
     setOpen((prevState) => ({
@@ -127,37 +131,19 @@ export default function AllSensor() {
       });
   };
 
-  const selectOrganization = (event) => {
-    const selectedValue = event.target.value;
-    setMyKey(event.target.value);
-    if (!selectedValue) {
-      setSensorData([]);
-      setSelectedOption("");
-      return;
-    }
-    if (selectedValue === selectedOption) {
-      return;
-    }
-    setSelectedOption(selectedValue);
-    // console.log("Selected Value:", selectedValue);
-    // axios
-    //   .get(`${urlGateway}/organizations/${selectedValue}/sensors/all`, {
-    //     headers: {
-    //       Authorization: "Bearer " + accessToken,
-    //     },
-    //   })
-    //   .then(function (response) {
-    //     console.log(response.data.data);
-    //     if (!accessToken) {
-    //       navigate("/login");
-    //     }
-    //     setSensorData(response.data.data);
-    //     // setDeletionFlag(!deletionFlag);
-    //   })
-    //   .catch(function (error) {
-    //     console.log(error);
-    //   });
-  };
+  // const selectOrganization = (event) => {
+  //   const selectedValue = event.target.value;
+  //   setMyKey(event.target.value);
+  //   if (!selectedValue) {
+  //     setSensorData([]);
+  //     setSelectedOption("");
+  //     return;
+  //   }
+  //   if (selectedValue === selectedOption) {
+  //     return;
+  //   }
+  //   setSelectedOption(selectedValue);
+  // };
 
   useEffect(() => {
     axios
@@ -168,20 +154,12 @@ export default function AllSensor() {
       })
       .then(function (response) {
         console.log(response.data.data);
-        const organizationDatas = response.data.data.organization.map(
-          (org) => ({
-            id: org.id,
-            name: org.name,
-          })
-        );
+        setuserData(response.data.data);
+        setOrganizationData(response.data.data.organization[0]);
 
         if (!accessToken) {
           navigate("/login");
         }
-
-        setOrganizationData(organizationDatas);
-        setIsLoadingOrganization(false);
-        console.log(organizationDatas);
       })
       .catch(function (error) {
         console.log(error);
@@ -190,7 +168,7 @@ export default function AllSensor() {
 
   useEffect(() => {
     axios
-      .get(`${urlGateway}/organizations/${myKey}/sensors/all`, {
+      .get(`${urlGateway}/organizations/${organizationId}/sensors/all`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
@@ -206,7 +184,7 @@ export default function AllSensor() {
       .catch(function (error) {
         console.log(error);
       });
-  }, [myKey, deletionFlag]);
+  }, [deletionFlag]);
 
   return (
     <>
@@ -216,6 +194,7 @@ export default function AllSensor() {
           flexDirection: "column",
           justifyContent: "center",
           alignContent: "center",
+          marginLeft: -20,
         }}
       >
         <Box
@@ -229,6 +208,7 @@ export default function AllSensor() {
             alignContent: "center",
             borderRadius: "16px",
             boxShadow: 3,
+            mt: 8,
           }}
         >
           <Box
@@ -237,27 +217,10 @@ export default function AllSensor() {
             }}
           >
             <Box display="flex" justifyContent="space-between">
-              {!isLoadingOrganization && (
-                <TextField
-                  id="list-organization-user"
-                  select
-                  label="Select Organization"
-                  defaultValue={selectedOption}
-                  value={selectedOption}
-                  onChange={selectOrganization}
-                  SelectProps={{
-                    native: true,
-                  }}
-                  helperText="Please select your organization"
-                >
-                  <option value=""></option>
-                  {organizationData.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </TextField>
-              )}
+              <Typography variant="h5">
+                {organizationData.name} Sensors
+              </Typography>
+              {/* {console.log(userData.organization[0].name)} */}
               <Button onClick={handleOpenAdd}>Add Sensor</Button>
               <Modal
                 open={openAdd}
@@ -265,10 +228,21 @@ export default function AllSensor() {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
               >
-                <CreateSensor handleCloseAdd={handleCloseAdd} />
+                <CreateSensor
+                  handleCloseAdd={handleCloseAdd}
+                  organizationId={organizationId}
+                />
               </Modal>
             </Box>
           </Box>
+          <Divider
+            sx={{
+              px: 10,
+            }}
+          >
+            <Chip label="List of All Sensor" />
+          </Divider>
+
           <Box
             sx={{
               p: 2,
@@ -278,11 +252,11 @@ export default function AllSensor() {
               component={Paper}
               sx={{
                 p: 2,
-                maxWidth: 900,
+                maxWidth: 1250,
                 alignContent: "center",
               }}
             >
-              <Table sx={{ maxWidth: 950 }} aria-label="customized table">
+              <Table sx={{ maxWidth: 1250 }} aria-label="customized table">
                 <TableHead>
                   <TableRow>
                     <StyledTableCell>ID</StyledTableCell>
@@ -413,7 +387,13 @@ export default function AllSensor() {
               pt: 3,
             }}
           >
-            <Typography variant="h5">Sensor Installation</Typography>;
+            <Divider
+              sx={{
+                px: 10,
+              }}
+            >
+              <Chip label="Sensor Installation" />
+            </Divider>
           </Box>
           <List sx={{ width: "100%", bgcolor: "background.paper" }}>
             <ListItem>

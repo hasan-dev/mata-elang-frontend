@@ -15,6 +15,7 @@ import Stack from "@mui/material/Stack";
 import {
   Box,
   Card,
+  Chip,
   Divider,
   Grid,
   Modal,
@@ -55,7 +56,8 @@ export default function AllAsset() {
   const accessToken = Cookies.get("access_token");
   const navigate = useNavigate();
   const userId = Cookies.get("user_id");
-  const [organizationData, setOrganizationData] = useState([]);
+  const organizationId = Cookies.get("organization_id");
+  // const [organizationData, setOrganizationData] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoadingOrganization, setIsLoadingOrganization] = useState(true);
   const [open, setOpen] = useState(false);
@@ -63,6 +65,8 @@ export default function AllAsset() {
   const handleClose = () => setOpen(false);
   const [deletionFlag, setDeletionFlag] = useState(false);
   const [OrgId, setOrgId] = useState(0);
+  const [userData, setuserData] = useState({});
+  const [organizationData, setOrganizationData] = useState({});
 
   const handleDeleteAsset = (assetId) => {
     axios
@@ -79,37 +83,6 @@ export default function AllAsset() {
       });
   };
 
-  const selectOrganization = (event) => {
-    const selectedValue = event.target.value;
-    setOrgId(event.target.value);
-    if (!selectedValue) {
-      setAssetData([]);
-      setSelectedOption("");
-      return;
-    }
-    if (selectedValue === selectedOption) {
-      return;
-    }
-    setSelectedOption(selectedValue);
-    // console.log("Selected Value:", selectedValue);
-    // axios
-    //   .get(`${urlGateway}/organizations/${selectedValue}/assets/all`, {
-    //     headers: {
-    //       Authorization: "Bearer " + accessToken,
-    //     },
-    //   })
-    //   .then(function (response) {
-    //     console.log(response.data.data);
-    //     if (!accessToken) {
-    //       navigate("/login");
-    //     }
-    //     setAssetData(response.data.data);
-    //   })
-    //   .catch(function (error) {
-    //     console.log(error);
-    //   });
-  };
-
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_URL_API_GATEWAY}/users/${userId}`, {
@@ -118,21 +91,8 @@ export default function AllAsset() {
         },
       })
       .then(function (response) {
-        console.log(response.data.data);
-        const organizationDatas = response.data.data.organization.map(
-          (org) => ({
-            id: org.id,
-            name: org.name,
-          })
-        );
-
-        if (!accessToken) {
-          navigate("/login");
-        }
-
-        setOrganizationData(organizationDatas);
-        setIsLoadingOrganization(false);
-        console.log(organizationDatas);
+        setuserData(response.data.data);
+        setOrganizationData(response.data.data.organization[0]);
       })
       .catch(function (error) {
         console.log(error);
@@ -141,22 +101,18 @@ export default function AllAsset() {
 
   useEffect(() => {
     axios
-      .get(`${urlGateway}/organizations/${OrgId}/assets/all`, {
+      .get(`${urlGateway}/organizations/${organizationId}/assets/all`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
       })
       .then(function (response) {
-        console.log(response.data.data);
-        if (!accessToken) {
-          navigate("/login");
-        }
         setAssetData(response.data.data);
       })
       .catch(function (error) {
         console.log(error);
       });
-  }, [OrgId, deletionFlag]);
+  }, [deletionFlag]);
 
   return (
     <>
@@ -177,30 +133,15 @@ export default function AllAsset() {
         <Box
           sx={{
             p: 3,
+            display: "flex",
+            justifyContent: "space-between",
           }}
         >
-          <Box display="flex" justifyContent="space-between">
-            {!isLoadingOrganization && (
-              <TextField
-                id="list-organization-user"
-                select
-                label="Select Organization"
-                defaultValue={selectedOption}
-                value={selectedOption}
-                onChange={selectOrganization}
-                SelectProps={{
-                  native: true,
-                }}
-                helperText="Please select your organization"
-              >
-                <option value=""></option>
-                {organizationData.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </TextField>
-            )}
+          <Box>
+            <Typography variant="h5">{organizationData.name} Asset</Typography>
+          </Box>
+
+          <Box>
             <Button onClick={handleOpen}>Add Asset</Button>
             <Modal
               open={open}
@@ -212,6 +153,13 @@ export default function AllAsset() {
             </Modal>
           </Box>
         </Box>
+        <Divider
+          sx={{
+            px: 10,
+          }}
+        >
+          <Chip label="List of All Asset" />
+        </Divider>
         <Box
           sx={{
             p: 3,

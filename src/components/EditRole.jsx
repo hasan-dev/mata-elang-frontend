@@ -20,7 +20,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
 const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
-export default function CreateRole({ handleCloseAdd }) {
+export default function EditRole({ roleId, handleCloseEdit, organizationId }) {
   const [userData, setuserData] = useState([]);
   const [dataRole, setDataRole] = useState({
     name: "",
@@ -30,7 +30,6 @@ export default function CreateRole({ handleCloseAdd }) {
   });
   const accessToken = Cookies.get("access_token");
   const userId = Cookies.get("user_id");
-  const organizationId = Cookies.get("organization_id");
   const [permissionData, setPermissionData] = useState([]);
   const [selectedPermission, setselectedPermission] = useState([]);
   const [organizationData, setOrganizationData] = useState({});
@@ -44,7 +43,7 @@ export default function CreateRole({ handleCloseAdd }) {
     };
 
     axios
-      .post(`${urlGateway}/roles/create`, dataRoleSubmit, {
+      .patch(`${urlGateway}/roles/update/${roleId}`, dataRoleSubmit, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
@@ -52,7 +51,7 @@ export default function CreateRole({ handleCloseAdd }) {
       .then(function (response) {
         console.log(response.data);
         if (response.status === "success") {
-          handleCloseAdd();
+          handleCloseEdit();
         }
       })
       .catch(function (error) {
@@ -62,14 +61,17 @@ export default function CreateRole({ handleCloseAdd }) {
 
   useEffect(() => {
     axios
-      .get(`${urlGateway}/users/${userId}`, {
+      .get(`${urlGateway}/roles/${roleId}`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
       })
       .then(function (response) {
-        setuserData(response.data.data);
-        setOrganizationData(response.data.data.organization[0]);
+        const role = response.data.data;
+        setDataRole(role);
+        setselectedPermission(
+          role.permissions.map((permission) => permission.id)
+        );
       })
       .catch(function (error) {
         console.log(error);

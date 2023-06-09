@@ -11,6 +11,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Avatar,
 } from "@mui/material";
 import { Link, Outlet, useLocation, useMatch } from "react-router-dom";
 import AllSensor from "./AllSensor";
@@ -25,24 +26,30 @@ import { Dashboard, DashboardCustomize } from "@mui/icons-material";
 import BusinessIcon from "@mui/icons-material/Business";
 import Profile from "@mui/icons-material/AccountCircle";
 import PeopleIcon from "@mui/icons-material/People";
-import AccessibilityIcon from '@mui/icons-material/Accessibility';
+import AccessibilityIcon from "@mui/icons-material/Accessibility";
 
-const PermanentDrawerLeft = ({children}) => {
-  const drawerWidth = 240;
+const PermanentDrawerLeft = ({ children }) => {
+  const drawerWidth = 250;
   const location = useLocation();
 
   const menuItems = [
     { name: "Dashboard", icon: Dashboard, path: "/dashboard" },
     { name: "Sensor", icon: MailIcon, path: "/dashboard/all-sensor" },
     { name: "Asset", icon: DashboardCustomize, path: "/dashboard/all-asset" },
-    { name: "Organization", icon: BusinessIcon, path: "/dashboard/organization" },
+    {
+      name: "Organization",
+      icon: BusinessIcon,
+      path: "/dashboard/organization",
+    },
     { name: "Role", icon: AccessibilityIcon, path: "/dashboard/role" },
     { name: "User", icon: PeopleIcon, path: "/dashboard/user" },
     { name: "Profile", icon: Profile, path: "/dashboard/profile" },
-    { name: "Testing", icon: Profile, path: "/dashboard/testing"}
+    { name: "Testing", icon: Profile, path: "/dashboard/testing" },
   ];
 
-  const currentMenuItem = menuItems.find((item) => item.path === location.pathname);
+  const currentMenuItem = menuItems.find(
+    (item) => item.path === location.pathname
+  );
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -53,7 +60,7 @@ const PermanentDrawerLeft = ({children}) => {
       >
         <Toolbar>
           <Typography variant="h6" noWrap component="div">
-          {currentMenuItem ? currentMenuItem.name : "Dashboard"}
+            {currentMenuItem ? currentMenuItem.name : "Dashboard"}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -69,8 +76,25 @@ const PermanentDrawerLeft = ({children}) => {
         variant="permanent"
         anchor="left"
       >
-        <Toolbar />
-        <Divider />
+        <Box
+          sx={{
+            display: "flex",
+            p: 2,
+            justifyContent: "flex-start",
+          }}
+        >
+          <Box>
+            <Avatar alt="Mata Elang" src="/public/logo.jpeg" />
+          </Box>
+          <Box
+            sx={{
+              ml: 3,
+              my: 1,
+            }}
+          >
+            <Typography variant="h6">Mata Elang</Typography>
+          </Box>
+        </Box>
         <List>
           {menuItems.map((item) => (
             <ListItem
