@@ -21,10 +21,6 @@ export default function OrganizationDetail() {
   const userId = Cookies.get("user_id");
   const navigate = useNavigate();
 
-  if (!accessToken) {
-    navigate("/login");
-  }
-
   useEffect(() => {
     axios
       .get(`${urlGateway}/users/${userId}`, {

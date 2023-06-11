@@ -61,12 +61,29 @@ export default function AllAsset() {
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoadingOrganization, setIsLoadingOrganization] = useState(true);
   const [open, setOpen] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const [deletionFlag, setDeletionFlag] = useState(false);
+  const [editFlag, setEditFlag] = useState(false);
+  const [addFlag, setAddFlag] = useState(false);
   const [OrgId, setOrgId] = useState(0);
   const [userData, setuserData] = useState({});
   const [organizationData, setOrganizationData] = useState({});
+
+  const handleOpenEdit = (assetId) => {
+    setOpenEdit((prevState) => ({
+      ...prevState,
+      [assetId]: true,
+    }));
+  };
+
+  const handleCloseEdit = (assetId) => {
+    setOpenEdit((prevState) => ({
+      ...prevState,
+      [assetId]: false,
+    }));
+  };
 
   const handleDeleteAsset = (assetId) => {
     axios
@@ -112,7 +129,7 @@ export default function AllAsset() {
       .catch(function (error) {
         console.log(error);
       });
-  }, [deletionFlag]);
+  }, [deletionFlag, addFlag, editFlag]);
 
   return (
     <>
@@ -149,7 +166,12 @@ export default function AllAsset() {
               aria-labelledby="modal-modal-title"
               aria-describedby="modal-modal-description"
             >
-              <CreateAsset />
+              <CreateAsset
+                organizationId={organizationId}
+                handleClose={handleClose}
+                addFlag={addFlag}
+                setAddFlag={setAddFlag}
+              />
             </Modal>
           </Box>
         </Box>
@@ -219,17 +241,23 @@ export default function AllAsset() {
                       <Button
                         variant="contained"
                         endIcon={<EditIcon />}
-                        onClick={handleOpen}
+                        onClick={() => handleOpenEdit(row.id)}
                       >
-                        Edit Asset
+                        Edit
                       </Button>
                       <Modal
-                        open={open}
-                        onClose={handleClose}
+                        open={openEdit[row.id] || false}
+                        onClose={() => handleCloseEdit(row.id)}
                         aria-labelledby="modal-modal-title"
                         aria-describedby="modal-modal-description"
                       >
-                        <EditAsset props={row.id} />
+                        <EditAsset
+                          assetId={row.id}
+                          organizationId={organizationId}
+                          handleCloseEdit={handleCloseEdit}
+                          editFlag={editFlag}
+                          setEditFlag={setEditFlag}
+                        />
                       </Modal>
                     </Stack>
                   </StyledTableRow>

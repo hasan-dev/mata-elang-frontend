@@ -72,6 +72,8 @@ export default function AllRole() {
   const handleOpenAdd = () => setOpenAdd(true);
   const handleCloseAdd = () => setOpenAdd(false);
   const [openEdit, setOpenEdit] = useState(false);
+  const [createFlag, setCreateFlag] = useState(false);
+  const [editFlag, setEditFlag] = useState(false);
 
   const handleOpenEdit = (roleId) => {
     setOpenEdit((prevState) => ({
@@ -102,21 +104,21 @@ export default function AllRole() {
       });
   };
 
-  useEffect(() => {
-    axios
-      .get(`${urlGateway}/users/${userId}`, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
-      .then(function (response) {
-        setuserData(response.data.data);
-        setOrganizationData(response.data.data.organization[0]);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get(`${urlGateway}/users/${userId}`, {
+  //       headers: {
+  //         Authorization: "Bearer " + accessToken,
+  //       },
+  //     })
+  //     .then(function (response) {
+  //       setuserData(response.data.data);
+  //       setOrganizationData(response.data.data.organization[0]);
+  //     })
+  //     .catch(function (error) {
+  //       console.log(error);
+  //     });
+  // }, []);
 
   useEffect(() => {
     axios
@@ -132,7 +134,7 @@ export default function AllRole() {
       .catch(function (error) {
         console.log(error);
       });
-  }, [deletionFlag]);
+  }, [deletionFlag, createFlag, editFlag]);
 
   return (
     <>
@@ -174,6 +176,8 @@ export default function AllRole() {
               <CreateRole
                 handleCloseAdd={handleCloseAdd}
                 organizationId={organizationId}
+                createFlag={createFlag}
+                setCreateFlag={setCreateFlag}
               />
             </Modal>
           </Box>
@@ -251,8 +255,10 @@ export default function AllRole() {
                       >
                         <EditRole
                           roleId={row.id}
-                          handleClose={handleCloseEdit}
+                          handleCloseEdit={handleCloseEdit}
                           organizationId={organizationId}
+                          editFlag={editFlag}
+                          setEditFlag={setEditFlag}
                         />
                       </Modal>
                     </Stack>

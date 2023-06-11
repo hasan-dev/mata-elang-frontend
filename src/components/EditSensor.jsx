@@ -17,7 +17,13 @@ import UploadRules from "./UploadRules";
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
 const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
-const EditSensor = ({ sensorData, sensorId, handleClose }) => {
+const EditSensor = ({
+  sensorData,
+  sensorId,
+  handleClose,
+  editFlag,
+  setEditFlag,
+}) => {
   // let { sensorId } = useParams();
   const [openChildModal, setOpenChildModal] = useState(false);
 
@@ -70,9 +76,11 @@ const EditSensor = ({ sensorData, sensorId, handleClose }) => {
         },
       })
       .then(function (response) {
-        console.log(response.status, response.data);
-        navigate("/dashboard/all-sensor");
-        handleClose(sensorId);
+        console.log(response.data);
+        if (response.data.message === "updated") {
+          setEditFlag(!editFlag);
+          handleClose(sensorId);
+        }
       })
       .catch(function (error) {
         console.log(error);
@@ -228,7 +236,7 @@ const EditSensor = ({ sensorData, sensorId, handleClose }) => {
             Submit
           </Button>
         </form>
-        <Typography
+        {/* <Typography
           variant="body2"
           align="center"
           style={{ marginTop: "16px" }}
@@ -245,7 +253,7 @@ const EditSensor = ({ sensorData, sensorId, handleClose }) => {
           >
             <UploadRules />
           </Modal>
-        </Typography>
+        </Typography> */}
       </CardContent>
     </Card>
   );

@@ -49,7 +49,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
 
 export default function AllUser() {
-  const [userData, setuserData] = useState([]);
+  const [userData, setuserData] = useState({});
   const accessToken = Cookies.get("access_token");
   const navigate = useNavigate();
   const userId = Cookies.get("user_id");
@@ -65,6 +65,8 @@ export default function AllUser() {
   // const [deletionFlag, setDeletionFlag] = useState(false);
   const [myKey, setMyKey] = useState(0);
   const [openEdit, setOpenEdit] = useState(false);
+  const [createFlag, setCreateFlag] = useState(false);
+  const [editFlag, setEditFlag] = useState(false);
 
   const handleOpenEdit = (userId) => {
     setOpenEdit((prevState) => ({
@@ -104,7 +106,7 @@ export default function AllUser() {
       })
       .then(function (response) {
         console.log(response.data.data);
-        setuserData(response.data.data);
+        // setuserData(response.data.data);
         setOrganizationData(response.data.data.organization[0]);
       })
       .catch(function (error) {
@@ -120,16 +122,12 @@ export default function AllUser() {
         },
       })
       .then(function (response) {
-        console.log(response.data.data);
-        if (!accessToken) {
-          navigate("/login");
-        }
         setuserData(response.data.data);
       })
       .catch(function (error) {
         console.log(error);
       });
-  }, [deletionFlag]);
+  }, [deletionFlag, createFlag, editFlag]);
 
   return (
     <>
@@ -168,8 +166,8 @@ export default function AllUser() {
           </Box>
         </Box> */}
           <Box display="flex" justifyContent="space-between">
+            {console.log(organizationData)}
             <Typography variant="h5">{organizationData.name} Users</Typography>
-            {console.log(userData)}
             <Button onClick={handleOpenAdd}>Add User</Button>
             <Modal
               open={openAdd}
@@ -180,6 +178,8 @@ export default function AllUser() {
               <CreateUser
                 handleCloseAdd={handleCloseAdd}
                 organizationId={organizationId}
+                createFlag={createFlag}
+                setCreateFlag={setCreateFlag}
               />
             </Modal>
           </Box>
@@ -224,10 +224,10 @@ export default function AllUser() {
                       {row.id}
                     </StyledTableCell>
                     <StyledTableCell align="right">{row.name}</StyledTableCell>
-                    <StyledTableCell align="right">{row.email}</StyledTableCell>
                     <StyledTableCell align="right">
-                      {row.phone_number}
+                      {row.organization[0].name}
                     </StyledTableCell>
+                    <StyledTableCell align="right">{row.email}</StyledTableCell>
                     <StyledTableCell align="right">
                       {Array.isArray(row.role) &&
                         row.role.map((role, index) => (
@@ -267,8 +267,10 @@ export default function AllUser() {
                       >
                         <EditUser
                           userId={row.id}
-                          handleClose={handleCloseEdit}
+                          handleCloseEdit={handleCloseEdit}
                           organizationId={organizationId}
+                          editFlag={editFlag}
+                          setEditFlag={setEditFlag}
                         />
                       </Modal>
                     </Stack>

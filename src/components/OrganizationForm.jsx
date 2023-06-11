@@ -1,13 +1,23 @@
-import { Card, CardContent, TextField, Button, Divider } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  TextField,
+  Typography,
+} from "@mui/material";
 import axios from "axios";
-import { useState, useEffect } from "react";
-import Cookies from "js-cookie";
+import dayjs from "dayjs";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
-const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
-const EditOrganization = () => {
+export default function OrganizationForm() {
   const [dataOrganization, setDataOrganization] = useState({
     name: "",
     email: "",
@@ -15,70 +25,49 @@ const EditOrganization = () => {
     province: "",
     city: "",
     phone_number: "",
+    website: "",
     oinkcode: "",
   });
-
-  const accessToken = Cookies.get("access_token");
+  const [dataRole, setDataRole] = useState({});
+  const [organizationId, setOrganizationId] = useState(null);
+  const [selectedRoles, setSelectedRoles] = useState([]);
   const navigate = useNavigate();
 
-  if (!accessToken) {
-    navigate("/login");
-  }
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
     const dataOrganizationSubmit = {
       name: dataOrganization.name,
       email: dataOrganization.email,
       address: dataOrganization.address,
       province: dataOrganization.province,
       city: dataOrganization.city,
+      website: dataOrganization.website,
       phone_number: dataOrganization.phone_number,
       oinkcode: dataOrganization.oinkcode,
-      parent_id: 1,
     };
 
+    console.log(dataOrganizationSubmit);
+
     axios
-      .post(`${urlGateway}/organizations/create`, dataOrganizationSubmit, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
+      .post(`${urlGateway}/organizations/create_first`, dataOrganizationSubmit)
       .then(function (response) {
-        console.log(response.status, response.data);
-        navigate("/login");
+        console.log(response.data);
+        // setDataOrganization(response.data.data.organization);
+        // setDataRole(response.data.data.admin_role);
+        // setOrganizationId(response.data.data.organization.id);
+        // setSelectedRoles(response.data.data.admin_role.id);
+        navigate("/user-form", {
+          state: { organizationData: response.data.data },
+        });
       })
       .catch(function (error) {
         console.log(error);
       });
   };
 
-  useEffect(() => {
-    axios
-      .get(`${urlGateway}/organizations/${organizationId}`, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
-      .then(function (response) {
-        console.log(response.data.data);
-        if (!accessToken) {
-          navigate("/login");
-        }
-        setDataOrganization(response.data.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  }, []);
-
-  useEffect(() => {
-    console.log(dataOrganization);
-  }, [dataOrganization]);
-
   return (
     <Card>
-      <h1>Edit Organisasi</h1>
+      <h1>Create Your Organization</h1>
       <Divider variant="middle" />
       <br />
       <CardContent>
@@ -157,6 +146,18 @@ const EditOrganization = () => {
             }}
           />
           <TextField
+            label="website"
+            fullWidth
+            margin="normal"
+            value={dataOrganization.website}
+            onChange={(event) => {
+              setDataOrganization({
+                ...dataOrganization,
+                website: event.target.value,
+              });
+            }}
+          />
+          <TextField
             label="oinkcode"
             fullWidth
             margin="normal"
@@ -175,6 +176,4 @@ const EditOrganization = () => {
       </CardContent>
     </Card>
   );
-};
-
-export default EditOrganization;
+}

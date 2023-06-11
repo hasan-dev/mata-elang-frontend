@@ -21,6 +21,8 @@ import AllRole from "./components/AllRole";
 
 import { Navigate, Outlet } from "react-router-dom";
 import Cookies from "js-cookie";
+import OrganizationForm from "./components/OrganizationForm";
+import UserForm from "./components/UserForm";
 
 const PrivateRoutes = () => {
   let auth = Cookies.get("access_token");
@@ -33,6 +35,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
+          <Route path="/register" element={<OrganizationForm />} />
+          <Route path="/user-form" element={<UserForm />} />
           <Route element={<PrivateRoutes />}>
             <Route path="/dashboard" element={<PermanentDrawerLeft />}>
               <Route index element={<ChartSensor />} />

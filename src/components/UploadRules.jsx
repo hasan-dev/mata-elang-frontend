@@ -39,8 +39,19 @@ const UploadRules = ({ sensorId, handleCloseUpload }) => {
   };
 
   return (
-    <Card>
-      <CardContent>
+    <Card
+      sx={{
+        maxWidth: 800,
+        mx: "auto",
+        my: 5,
+      }}
+    >
+      <CardContent
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <Typography variant="h4" align="center" gutterBottom>
           Upload Rules
         </Typography>

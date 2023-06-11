@@ -19,7 +19,13 @@ import CancelIcon from "@mui/icons-material/Cancel";
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
 const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
-export default function EditUser({ userId, handleCloseEdit, organizationId }) {
+export default function EditUser({
+  userId,
+  handleCloseEdit,
+  organizationId,
+  editFlag,
+  setEditFlag,
+}) {
   const accessToken = Cookies.get("access_token");
   const [rolesData, setRolesData] = useState([]);
   const [dataUser, setDataUser] = useState({
@@ -43,7 +49,7 @@ export default function EditUser({ userId, handleCloseEdit, organizationId }) {
         const user = response.data.data;
         console.log(user);
         setDataUser(user);
-        setSelectedRoles(user.role.map((role) => role.id));
+        // setSelectedRoles(user.role.map((role) => role.id));
       })
       .catch(function (error) {
         console.log(error);
@@ -84,8 +90,9 @@ export default function EditUser({ userId, handleCloseEdit, organizationId }) {
       })
       .then(function (response) {
         console.log(response.data);
-        if (response.status === "success") {
-          handleCloseEdit();
+        if (response.data.status === "success") {
+          setEditFlag(!editFlag);
+          handleCloseEdit(userId);
         }
       })
       .catch(function (error) {
@@ -149,6 +156,7 @@ export default function EditUser({ userId, handleCloseEdit, organizationId }) {
               fullWidth
               margin="normal"
               type="password"
+              required
               value={dataUser.password}
               onChange={(event) => {
                 setDataUser({ ...dataUser, password: event.target.value });

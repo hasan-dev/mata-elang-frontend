@@ -11,7 +11,7 @@ import {
 import axios from "axios";
 import { useState } from "react";
 import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [dataLogin, setDataLogin] = useState({
@@ -23,6 +23,11 @@ const LoginPage = () => {
   //   const [password, setPassword] = useState("");
   //   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const handleRegisterClick = () => {
+    history.push("/register");
+  };
+
   const postLogin = (e) => {
     e.preventDefault();
     axios
@@ -98,6 +103,13 @@ const LoginPage = () => {
               Login
             </Button>
           </form>
+          <Typography
+            variant="body2"
+            align="center"
+            style={{ marginTop: "16px" }}
+          >
+            Didnt Have Account? <Link to="/register">Click Here</Link>
+          </Typography>
         </CardContent>
       </Card>
     </div>

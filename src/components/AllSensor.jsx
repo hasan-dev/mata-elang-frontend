@@ -81,6 +81,8 @@ export default function AllSensor() {
   // const handleOpenUpload = () => setOpenUpload(true);
   // const handleCloseUpload = () => setOpenUpload(false);
   const [deletionFlag, setDeletionFlag] = useState(false);
+  const [createFlag, setCreateFlag] = useState(false);
+  const [editFlag, setEditFlag] = useState(false);
   const [myKey, setMyKey] = useState(0);
   const [open, setOpen] = useState({});
   const [openUpload, setOpenUpload] = useState({});
@@ -184,7 +186,7 @@ export default function AllSensor() {
       .catch(function (error) {
         console.log(error);
       });
-  }, [deletionFlag]);
+  }, [deletionFlag, createFlag, editFlag]);
 
   return (
     <>
@@ -231,6 +233,8 @@ export default function AllSensor() {
                 <CreateSensor
                   handleCloseAdd={handleCloseAdd}
                   organizationId={organizationId}
+                  createFlag={createFlag}
+                  setCreateFlag={setCreateFlag}
                 />
               </Modal>
             </Box>
@@ -340,6 +344,8 @@ export default function AllSensor() {
                             sensorData={sensorData}
                             sensorId={row.id}
                             handleClose={handleClose}
+                            editFlag={editFlag}
+                            setEditFlag={setEditFlag}
                           />
                         </Modal>
                         <Button

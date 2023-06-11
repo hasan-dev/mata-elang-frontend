@@ -15,7 +15,12 @@ import { useNavigate } from "react-router-dom";
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
 const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
-const CreateSensor = ({ handleCloseAdd, organizationId }) => {
+const CreateSensor = ({
+  handleCloseAdd,
+  organizationId,
+  createFlag,
+  setCreateFlag,
+}) => {
   const [dataSensor, setDataSensor] = useState({
     id: "",
     name: "",
@@ -65,8 +70,12 @@ const CreateSensor = ({ handleCloseAdd, organizationId }) => {
         },
       })
       .then(function (response) {
-        console.log(response.data);
-        handleCloseAdd();
+        console.log(response.data.message);
+        if (response.data.message === "registered") {
+          setCreateFlag(!createFlag);
+          handleCloseAdd();
+        }
+
         // navigate("/dashboard/all-sensor");
       })
       .catch(function (error) {

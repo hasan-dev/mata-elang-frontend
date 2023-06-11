@@ -20,7 +20,11 @@ import CancelIcon from "@mui/icons-material/Cancel";
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
 const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
-export default function CreateRole({ handleCloseAdd }) {
+export default function CreateRole({
+  handleCloseAdd,
+  createFlag,
+  setCreateFlag,
+}) {
   const [userData, setuserData] = useState([]);
   const [dataRole, setDataRole] = useState({
     name: "",
@@ -51,7 +55,8 @@ export default function CreateRole({ handleCloseAdd }) {
       })
       .then(function (response) {
         console.log(response.data);
-        if (response.status === "success") {
+        if (response.data.message === "success") {
+          setCreateFlag(!createFlag);
           handleCloseAdd();
         }
       })
