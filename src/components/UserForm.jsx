@@ -42,7 +42,7 @@ export default function UserForm() {
         //   handleCloseAdd();
         // }
 
-        navigate("/login");
+        navigate("/");
       })
       .catch(function (error) {
         console.log(error);

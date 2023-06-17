@@ -28,6 +28,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CreateRole from "./CreateRole";
 import EditRole from "./EditRole";
+import Swal from "sweetalert2";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -74,6 +75,7 @@ export default function AllRole() {
   const [openEdit, setOpenEdit] = useState(false);
   const [createFlag, setCreateFlag] = useState(false);
   const [editFlag, setEditFlag] = useState(false);
+  const [permissions, setPermissions] = useState([]);
 
   const handleOpenEdit = (roleId) => {
     setOpenEdit((prevState) => ({
@@ -90,35 +92,49 @@ export default function AllRole() {
   };
 
   const handleDeleteRole = (roleId) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${urlGateway}/roles/delete/${roleId}`, {
+            headers: {
+              Authorization: "Bearer " + accessToken,
+            },
+          })
+          .then(function (response) {
+            setDeletionFlag(!deletionFlag);
+            Swal.fire("Deleted!", "Your file has been deleted.", "success");
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
+    });
+  };
+
+  useEffect(() => {
     axios
-      .delete(`${urlGateway}/roles/delete/${roleId}`, {
+      .get(`${urlGateway}/users/${userId}`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
       })
       .then(function (response) {
-        setDeletionFlag(!deletionFlag);
+        setuserData(response.data.data);
+        setOrganizationData(response.data.data.organization[0]);
+        setPermissions(response.data.data.role[0].permissions);
       })
       .catch(function (error) {
         console.log(error);
       });
-  };
-
-  // useEffect(() => {
-  //   axios
-  //     .get(`${urlGateway}/users/${userId}`, {
-  //       headers: {
-  //         Authorization: "Bearer " + accessToken,
-  //       },
-  //     })
-  //     .then(function (response) {
-  //       setuserData(response.data.data);
-  //       setOrganizationData(response.data.data.organization[0]);
-  //     })
-  //     .catch(function (error) {
-  //       console.log(error);
-  //     });
-  // }, []);
+  }, []);
 
   useEffect(() => {
     axios
@@ -166,7 +182,30 @@ export default function AllRole() {
           </Box>
 
           <Box>
-            <Button onClick={handleOpenAdd}>Add Role</Button>
+            {permissions &&
+              permissions.map((permission) => {
+                if (permission.slug === "create-role") {
+                  return (
+                    <>
+                      <Button onClick={handleOpenAdd}>Add Role</Button>
+                      <Modal
+                        open={openAdd}
+                        onClose={handleCloseAdd}
+                        aria-labelledby="modal-modal-title"
+                        aria-describedby="modal-modal-description"
+                      >
+                        <CreateRole
+                          handleCloseAdd={handleCloseAdd}
+                          organizationId={organizationId}
+                          createFlag={createFlag}
+                          setCreateFlag={setCreateFlag}
+                        />
+                      </Modal>
+                    </>
+                  );
+                }
+              })}
+            {/* <Button onClick={handleOpenAdd}>Add Role</Button>
             <Modal
               open={openAdd}
               onClose={handleCloseAdd}
@@ -179,7 +218,7 @@ export default function AllRole() {
                 createFlag={createFlag}
                 setCreateFlag={setCreateFlag}
               />
-            </Modal>
+            </Modal> */}
           </Box>
         </Box>
         <Divider
@@ -232,15 +271,62 @@ export default function AllRole() {
                       ))}
                     </StyledTableCell>
                     <Stack direction="row" spacing={2} p={2}>
-                      <Button
+                      {permissions &&
+                        permissions.map((permission) => {
+                          if (permission.slug === "delete-role") {
+                            return (
+                              <>
+                                <Button
+                                  variant="outlined"
+                                  color="error"
+                                  startIcon={<DeleteIcon />}
+                                  onClick={() => handleDeleteRole(row.id)}
+                                >
+                                  Delete
+                                </Button>
+                              </>
+                            );
+                          }
+                        })}
+                      {/* <Button
                         variant="outlined"
                         color="error"
                         startIcon={<DeleteIcon />}
                         onClick={() => handleDeleteRole(row.id)}
                       >
                         Delete
-                      </Button>
-                      <Button
+                      </Button> */}
+                      {permissions &&
+                        permissions.map((permission) => {
+                          if (permission.slug === "edit-role") {
+                            return (
+                              <>
+                                <Button
+                                  variant="contained"
+                                  endIcon={<EditIcon />}
+                                  onClick={() => handleOpenEdit(row.id)}
+                                >
+                                  Edit
+                                </Button>
+                                <Modal
+                                  open={openEdit[row.id] || false}
+                                  onClose={() => handleCloseEdit(row.id)}
+                                  aria-labelledby="modal-modal-title"
+                                  aria-describedby="modal-modal-description"
+                                >
+                                  <EditRole
+                                    roleId={row.id}
+                                    handleCloseEdit={handleCloseEdit}
+                                    organizationId={organizationId}
+                                    editFlag={editFlag}
+                                    setEditFlag={setEditFlag}
+                                  />
+                                </Modal>
+                              </>
+                            );
+                          }
+                        })}
+                      {/* <Button
                         variant="contained"
                         endIcon={<EditIcon />}
                         onClick={() => handleOpenEdit(row.id)}
@@ -260,7 +346,7 @@ export default function AllRole() {
                           editFlag={editFlag}
                           setEditFlag={setEditFlag}
                         />
-                      </Modal>
+                      </Modal> */}
                     </Stack>
                   </StyledTableRow>
                 ))}

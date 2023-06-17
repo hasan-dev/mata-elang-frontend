@@ -22,7 +22,7 @@ import ChartSensor from "./ChartSensor";
 import AllUser from "./AllUser";
 import CreateSensor from "./CreateSensor";
 import MailIcon from "@mui/icons-material/Mail";
-import { Dashboard, DashboardCustomize } from "@mui/icons-material";
+import { Dashboard, DashboardCustomize, Logout } from "@mui/icons-material";
 import BusinessIcon from "@mui/icons-material/Business";
 import Profile from "@mui/icons-material/AccountCircle";
 import PeopleIcon from "@mui/icons-material/People";
@@ -44,7 +44,7 @@ const PermanentDrawerLeft = ({ children }) => {
     { name: "Role", icon: AccessibilityIcon, path: "/dashboard/role" },
     { name: "User", icon: PeopleIcon, path: "/dashboard/user" },
     { name: "Profile", icon: Profile, path: "/dashboard/profile" },
-    { name: "Testing", icon: Profile, path: "/dashboard/testing" },
+    { name: "Logout", icon: Logout, path: "/dashboard/logout" },
   ];
 
   const currentMenuItem = menuItems.find(

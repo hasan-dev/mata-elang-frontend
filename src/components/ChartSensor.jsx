@@ -71,6 +71,9 @@ const ChartSensor = () => {
   const [dataLog, setDataLog] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const colorScale = data.map((item) =>
+    item.x === "Active" ? "green" : "tomato"
+  );
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -114,11 +117,13 @@ const ChartSensor = () => {
   }, []);
 
   useEffect(() => {
+    console.log(organizationId);
     console.log(sensorCounts);
     const newData = [
       { x: "Active", y: sensorCounts.active },
       { x: "Deactive", y: sensorCounts.nonActive },
     ];
+
     const filteredData = newData.filter((item) => item.y !== 0);
 
     setData(filteredData);
@@ -126,6 +131,7 @@ const ChartSensor = () => {
 
   return (
     <>
+      {console.log(dataLog)}
       <Box
         sx={{
           display: "flex",
@@ -158,7 +164,7 @@ const ChartSensor = () => {
         >
           <VictoryPie
             data={data}
-            colorScale={["tomato", "orange", "gold", "cyan", "navy"]}
+            colorScale={colorScale}
             width={500}
             labels={({ datum }) => `${datum.x}: ${datum.y}`}
             labelPosition="centroid"

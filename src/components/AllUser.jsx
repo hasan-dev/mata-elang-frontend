@@ -25,6 +25,7 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import CreateUser from "./CreateUser";
 import EditUser from "./EditUser";
+import Swal from "sweetalert2";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -67,6 +68,7 @@ export default function AllUser() {
   const [openEdit, setOpenEdit] = useState(false);
   const [createFlag, setCreateFlag] = useState(false);
   const [editFlag, setEditFlag] = useState(false);
+  const [permissions, setPermissions] = useState([]);
 
   const handleOpenEdit = (userId) => {
     setOpenEdit((prevState) => ({
@@ -83,18 +85,31 @@ export default function AllUser() {
   };
 
   const handleDeleteUser = (userId) => {
-    axios
-      .delete(`${urlGateway}/users/delete/${userId}`, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
-      .then(function (response) {
-        setDeletionFlag(!deletionFlag);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${urlGateway}/users/delete/${userId}`, {
+            headers: {
+              Authorization: "Bearer " + accessToken,
+            },
+          })
+          .then(function (response) {
+            setDeletionFlag(!deletionFlag);
+            Swal.fire("Deleted!", "Your file has been deleted.", "success");
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
+    });
   };
 
   useEffect(() => {
@@ -108,6 +123,8 @@ export default function AllUser() {
         console.log(response.data.data);
         // setuserData(response.data.data);
         setOrganizationData(response.data.data.organization[0]);
+        setPermissions(response.data.data.role[0].permissions);
+        // console.log(response.data.data.role[0].permissions);
       })
       .catch(function (error) {
         console.log(error);
@@ -131,6 +148,7 @@ export default function AllUser() {
 
   return (
     <>
+      {console.log(permissions)}
       <Box
         sx={{
           display: "flex",
@@ -166,9 +184,33 @@ export default function AllUser() {
           </Box>
         </Box> */}
           <Box display="flex" justifyContent="space-between">
-            {console.log(organizationData)}
+            {/* {console.log(organizationData)} */}
             <Typography variant="h5">{organizationData.name} Users</Typography>
-            <Button onClick={handleOpenAdd}>Add User</Button>
+            {/* {console.log(permissions)} */}
+            {permissions &&
+              permissions.map((permission) => {
+                if (permission.slug === "create-user") {
+                  return (
+                    <>
+                      <Button onClick={handleOpenAdd}>Add User</Button>
+                      <Modal
+                        open={openAdd}
+                        onClose={handleCloseAdd}
+                        aria-labelledby="modal-modal-title"
+                        aria-describedby="modal-modal-description"
+                      >
+                        <CreateUser
+                          handleCloseAdd={handleCloseAdd}
+                          organizationId={organizationId}
+                          createFlag={createFlag}
+                          setCreateFlag={setCreateFlag}
+                        />
+                      </Modal>
+                    </>
+                  );
+                }
+              })}
+            {/* <Button onClick={handleOpenAdd}>Add User</Button>
             <Modal
               open={openAdd}
               onClose={handleCloseAdd}
@@ -181,7 +223,7 @@ export default function AllUser() {
                 createFlag={createFlag}
                 setCreateFlag={setCreateFlag}
               />
-            </Modal>
+            </Modal> */}
           </Box>
         </Box>
         <Divider
@@ -244,22 +286,69 @@ export default function AllUser() {
                       {/* {console.log(row.role)} */}
                     </StyledTableCell>
                     <Stack direction="row" spacing={2} p={2}>
-                      <Button
+                      {permissions &&
+                        permissions.map((permission) => {
+                          if (permission.slug === "delete-user") {
+                            return (
+                              <Button
+                                key={row.id}
+                                variant="outlined"
+                                color="error"
+                                startIcon={<DeleteIcon />}
+                                onClick={() => handleDeleteUser(row.id)}
+                              >
+                                Delete
+                              </Button>
+                            );
+                          }
+                        })}
+                      {/* <Button
                         variant="outlined"
                         color="error"
                         startIcon={<DeleteIcon />}
                         onClick={() => handleDeleteUser(row.id)}
                       >
                         Delete
-                      </Button>
-                      <Button
+                      </Button> */}
+                      {permissions &&
+                        permissions.map((permission) => {
+                          if (permission.slug === "edit-user") {
+                            return (
+                              <>
+                                <Button
+                                  key={row.id}
+                                  variant="contained"
+                                  endIcon={<EditIcon />}
+                                  onClick={() => handleOpenEdit(row.id)}
+                                >
+                                  Edit
+                                </Button>
+                                <Modal
+                                  open={openEdit[row.id] || false}
+                                  onClose={() => handleCloseEdit(row.id)}
+                                  aria-labelledby="modal-modal-title"
+                                  aria-describedby="modal-modal-description"
+                                >
+                                  <EditUser
+                                    userId={row.id}
+                                    handleCloseEdit={handleCloseEdit}
+                                    organizationId={organizationId}
+                                    editFlag={editFlag}
+                                    setEditFlag={setEditFlag}
+                                  />
+                                </Modal>
+                              </>
+                            );
+                          }
+                        })}
+                      {/* <Button
                         variant="contained"
                         endIcon={<EditIcon />}
                         onClick={() => handleOpenEdit(row.id)}
                       >
                         Edit
-                      </Button>
-                      <Modal
+                      </Button> */}
+                      {/* <Modal
                         open={openEdit[row.id] || false}
                         onClose={() => handleCloseEdit(row.id)}
                         aria-labelledby="modal-modal-title"
@@ -272,7 +361,7 @@ export default function AllUser() {
                           editFlag={editFlag}
                           setEditFlag={setEditFlag}
                         />
-                      </Modal>
+                      </Modal> */}
                     </Stack>
                   </StyledTableRow>
                 ))}

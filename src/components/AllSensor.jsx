@@ -38,6 +38,7 @@ import EditSensor from "./EditSensor";
 import UploadRules from "./UploadRules";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import Swal from "sweetalert2";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -88,6 +89,7 @@ export default function AllSensor() {
   const [openUpload, setOpenUpload] = useState({});
   const [userData, setuserData] = useState({});
   const [organizationData, setOrganizationData] = useState({});
+  const [permissions, setPermissions] = useState([]);
 
   const handleOpen = (sensorId) => {
     setOpen((prevState) => ({
@@ -118,19 +120,32 @@ export default function AllSensor() {
   };
 
   const handleDeleteSensor = (sensorId) => {
-    axios
-      .delete(`${urlGateway}/sensors/delete/${sensorId}`, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
-      .then(function (response) {
-        // navigate("/dashboard/all-sensor");
-        setDeletionFlag(!deletionFlag);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${urlGateway}/sensors/delete/${sensorId}`, {
+            headers: {
+              Authorization: "Bearer " + accessToken,
+            },
+          })
+          .then(function (response) {
+            // navigate("/dashboard/all-sensor");
+            setDeletionFlag(!deletionFlag);
+            Swal.fire("Deleted!", "Your file has been deleted.", "success");
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
+    });
   };
 
   // const selectOrganization = (event) => {
@@ -158,6 +173,7 @@ export default function AllSensor() {
         console.log(response.data.data);
         setuserData(response.data.data);
         setOrganizationData(response.data.data.organization[0]);
+        setPermissions(response.data.data.role[0].permissions);
 
         if (!accessToken) {
           navigate("/login");
@@ -223,7 +239,30 @@ export default function AllSensor() {
                 {organizationData.name} Sensors
               </Typography>
               {/* {console.log(userData.organization[0].name)} */}
-              <Button onClick={handleOpenAdd}>Add Sensor</Button>
+              {permissions &&
+                permissions.map((permission) => {
+                  if (permission.slug === "create-sensor") {
+                    return (
+                      <>
+                        <Button onClick={handleOpenAdd}>Add Sensor</Button>
+                        <Modal
+                          open={openAdd}
+                          onClose={handleCloseAdd}
+                          aria-labelledby="modal-modal-title"
+                          aria-describedby="modal-modal-description"
+                        >
+                          <CreateSensor
+                            handleCloseAdd={handleCloseAdd}
+                            organizationId={organizationId}
+                            createFlag={createFlag}
+                            setCreateFlag={setCreateFlag}
+                          />
+                        </Modal>
+                      </>
+                    );
+                  }
+                })}
+              {/* <Button onClick={handleOpenAdd}>Add Sensor</Button>
               <Modal
                 open={openAdd}
                 onClose={handleCloseAdd}
@@ -236,7 +275,7 @@ export default function AllSensor() {
                   createFlag={createFlag}
                   setCreateFlag={setCreateFlag}
                 />
-              </Modal>
+              </Modal> */}
             </Box>
           </Box>
           <Divider
@@ -318,7 +357,25 @@ export default function AllSensor() {
                         {row.organization_name}
                       </StyledTableCell>
                       <Stack direction="row" spacing={2} p={2} m={2}>
-                        <Button
+                        {permissions &&
+                          permissions.map((permission) => {
+                            if (permission.slug === "delete-sensor") {
+                              return (
+                                <>
+                                  <Button
+                                    variant="outlined"
+                                    color="error"
+                                    sensorData
+                                    startIcon={<DeleteIcon />}
+                                    onClick={() => handleDeleteSensor(row.id)}
+                                  >
+                                    Delete
+                                  </Button>
+                                </>
+                              );
+                            }
+                          })}
+                        {/* <Button
                           variant="outlined"
                           color="error"
                           sensorData
@@ -326,8 +383,56 @@ export default function AllSensor() {
                           onClick={() => handleDeleteSensor(row.id)}
                         >
                           Delete
-                        </Button>
-                        <Button
+                        </Button> */}
+                        {permissions &&
+                          permissions.map((permission) => {
+                            if (permission.slug === "update-sensor") {
+                              return (
+                                <>
+                                  <Button
+                                    variant="contained"
+                                    endIcon={<EditIcon />}
+                                    onClick={() => handleOpen(row.id)}
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Modal
+                                    open={open[row.id] || false}
+                                    onClose={() => handleClose(row.id)}
+                                    aria-labelledby="modal-modal-title"
+                                    aria-describedby="modal-modal-description"
+                                  >
+                                    <EditSensor
+                                      sensorData={sensorData}
+                                      sensorId={row.id}
+                                      handleClose={handleClose}
+                                      editFlag={editFlag}
+                                      setEditFlag={setEditFlag}
+                                    />
+                                  </Modal>
+                                  <Button
+                                    variant="outlined"
+                                    endIcon={<UploadFileIcon />}
+                                    onClick={() => handleOpenUpload(row.id)}
+                                  >
+                                    Rules
+                                  </Button>
+                                  <Modal
+                                    open={openUpload[row.id] || false}
+                                    onClose={() => handleCloseUpload(row.id)}
+                                    aria-labelledby="modal-modal-title"
+                                    aria-describedby="modal-modal-description"
+                                  >
+                                    <UploadRules
+                                      sensorId={row.id}
+                                      handleCloseUpload={handleCloseUpload}
+                                    />
+                                  </Modal>
+                                </>
+                              );
+                            }
+                          })}
+                        {/* <Button
                           variant="contained"
                           endIcon={<EditIcon />}
                           onClick={() => handleOpen(row.id)}
@@ -347,8 +452,8 @@ export default function AllSensor() {
                             editFlag={editFlag}
                             setEditFlag={setEditFlag}
                           />
-                        </Modal>
-                        <Button
+                        </Modal> */}
+                        {/* <Button
                           variant="outlined"
                           endIcon={<UploadFileIcon />}
                           onClick={() => handleOpenUpload(row.id)}
@@ -365,7 +470,7 @@ export default function AllSensor() {
                             sensorId={row.id}
                             handleCloseUpload={handleCloseUpload}
                           />
-                        </Modal>
+                        </Modal> */}
                       </Stack>
                     </StyledTableRow>
                   ))}

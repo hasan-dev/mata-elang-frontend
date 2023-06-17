@@ -27,6 +27,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import CreateAsset from "./CreateAsset";
 import EditAsset from "./EditAsset";
+import Swal from "sweetalert2";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -70,6 +71,7 @@ export default function AllAsset() {
   const [OrgId, setOrgId] = useState(0);
   const [userData, setuserData] = useState({});
   const [organizationData, setOrganizationData] = useState({});
+  const [permissions, setPermissions] = useState([]);
 
   const handleOpenEdit = (assetId) => {
     setOpenEdit((prevState) => ({
@@ -86,18 +88,31 @@ export default function AllAsset() {
   };
 
   const handleDeleteAsset = (assetId) => {
-    axios
-      .delete(`${urlGateway}/assets/delete/${assetId}`, {
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      })
-      .then(function (response) {
-        setDeletionFlag(!deletionFlag);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${urlGateway}/assets/delete/${assetId}`, {
+            headers: {
+              Authorization: "Bearer " + accessToken,
+            },
+          })
+          .then(function (response) {
+            setDeletionFlag(!deletionFlag);
+            Swal.fire("Deleted!", "Your file has been deleted.", "success");
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
+    });
   };
 
   useEffect(() => {
@@ -110,6 +125,7 @@ export default function AllAsset() {
       .then(function (response) {
         setuserData(response.data.data);
         setOrganizationData(response.data.data.organization[0]);
+        setPermissions(response.data.data.role[0].permissions);
       })
       .catch(function (error) {
         console.log(error);
@@ -159,7 +175,30 @@ export default function AllAsset() {
           </Box>
 
           <Box>
-            <Button onClick={handleOpen}>Add Asset</Button>
+            {permissions &&
+              permissions.map((permission) => {
+                if (permission.slug === "create-asset") {
+                  return (
+                    <>
+                      <Button onClick={handleOpen}>Add Asset</Button>
+                      <Modal
+                        open={open}
+                        onClose={handleClose}
+                        aria-labelledby="modal-modal-title"
+                        aria-describedby="modal-modal-description"
+                      >
+                        <CreateAsset
+                          organizationId={organizationId}
+                          handleClose={handleClose}
+                          addFlag={addFlag}
+                          setAddFlag={setAddFlag}
+                        />
+                      </Modal>
+                    </>
+                  );
+                }
+              })}
+            {/* <Button onClick={handleOpen}>Add Asset</Button>
             <Modal
               open={open}
               onClose={handleClose}
@@ -172,7 +211,7 @@ export default function AllAsset() {
                 addFlag={addFlag}
                 setAddFlag={setAddFlag}
               />
-            </Modal>
+            </Modal> */}
           </Box>
         </Box>
         <Divider
@@ -230,15 +269,61 @@ export default function AllAsset() {
                       {row.organization_name}
                     </StyledTableCell>
                     <Stack direction="row" spacing={2} p={2}>
-                      <Button
+                      {permissions &&
+                        permissions.map((permission) => {
+                          if (permission.slug === "delete-asset") {
+                            return (
+                              <Button
+                                key={row.id}
+                                variant="outlined"
+                                color="error"
+                                startIcon={<DeleteIcon />}
+                                onClick={() => handleDeleteAsset(row.id)}
+                              >
+                                Delete
+                              </Button>
+                            );
+                          }
+                        })}
+                      {/* <Button
                         variant="outlined"
                         color="error"
                         startIcon={<DeleteIcon />}
                         onClick={() => handleDeleteAsset(row.id)}
                       >
                         Delete
-                      </Button>
-                      <Button
+                      </Button> */}
+                      {permissions &&
+                        permissions.map((permission) => {
+                          if (permission.slug === "edit-asset") {
+                            return (
+                              <>
+                                <Button
+                                  variant="contained"
+                                  endIcon={<EditIcon />}
+                                  onClick={() => handleOpenEdit(row.id)}
+                                >
+                                  Edit
+                                </Button>
+                                <Modal
+                                  open={openEdit[row.id] || false}
+                                  onClose={() => handleCloseEdit(row.id)}
+                                  aria-labelledby="modal-modal-title"
+                                  aria-describedby="modal-modal-description"
+                                >
+                                  <EditAsset
+                                    assetId={row.id}
+                                    organizationId={organizationId}
+                                    handleCloseEdit={handleCloseEdit}
+                                    editFlag={editFlag}
+                                    setEditFlag={setEditFlag}
+                                  />
+                                </Modal>
+                              </>
+                            );
+                          }
+                        })}
+                      {/* <Button
                         variant="contained"
                         endIcon={<EditIcon />}
                         onClick={() => handleOpenEdit(row.id)}
@@ -258,7 +343,7 @@ export default function AllAsset() {
                           editFlag={editFlag}
                           setEditFlag={setEditFlag}
                         />
-                      </Modal>
+                      </Modal> */}
                     </Stack>
                   </StyledTableRow>
                 ))}
