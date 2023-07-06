@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
+const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
+const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
+
 const EditOrganization = () => {
   const [dataOrganization, setDataOrganization] = useState({
     name: "",
@@ -36,15 +39,11 @@ const EditOrganization = () => {
     };
 
     axios
-      .post(
-        "http://127.0.0.1:8001/api/organizations/create",
-        dataOrganizationSubmit,
-        {
-          headers: {
-            Authorization: "Bearer " + accessToken,
-          },
-        }
-      )
+      .post(`${urlGateway}/organizations/create`, dataOrganizationSubmit, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
       .then(function (response) {
         console.log(response.status, response.data);
         navigate("/login");
@@ -56,7 +55,7 @@ const EditOrganization = () => {
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8001/api/organizations/6", {
+      .get(`${urlGateway}/organizations/${organizationId}`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },

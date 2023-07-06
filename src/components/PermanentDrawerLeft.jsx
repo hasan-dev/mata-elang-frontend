@@ -11,52 +11,45 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Avatar,
 } from "@mui/material";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useMatch } from "react-router-dom";
 import AllSensor from "./AllSensor";
 import AllAsset from "./AllAsset";
 import EditOrganization from "./EditOrganization";
 import ProfilePage from "./Profile";
 import ChartSensor from "./ChartSensor";
+import AllUser from "./AllUser";
+import CreateSensor from "./CreateSensor";
+import MailIcon from "@mui/icons-material/Mail";
+import { Dashboard, DashboardCustomize, Logout } from "@mui/icons-material";
+import BusinessIcon from "@mui/icons-material/Business";
+import Profile from "@mui/icons-material/AccountCircle";
+import PeopleIcon from "@mui/icons-material/People";
+import AccessibilityIcon from "@mui/icons-material/Accessibility";
 
-const PermanentDrawerLeft = ({ routes }) => {
-  const drawerWidth = 240;
-
-  const [activeContent, setActiveContent] = useState(null);
+const PermanentDrawerLeft = ({ children }) => {
+  const drawerWidth = 250;
   const location = useLocation();
 
-  useEffect(() => {
-    handleRouteSelect(null, location.pathname);
-  }, [location]);
+  const menuItems = [
+    { name: "Dashboard", icon: Dashboard, path: "/dashboard" },
+    { name: "Sensor", icon: MailIcon, path: "/dashboard/all-sensor" },
+    { name: "Asset", icon: DashboardCustomize, path: "/dashboard/all-asset" },
+    {
+      name: "Organization",
+      icon: BusinessIcon,
+      path: "/dashboard/organization",
+    },
+    { name: "Role", icon: AccessibilityIcon, path: "/dashboard/role" },
+    { name: "User", icon: PeopleIcon, path: "/dashboard/user" },
+    { name: "Profile", icon: Profile, path: "/dashboard/profile" },
+    { name: "Logout", icon: Logout, path: "/dashboard/logout" },
+  ];
 
-  const handleRouteSelect = (event, path) => {
-    event?.preventDefault();
-    switch (path) {
-      case "/dashboard":
-        setActiveContent(<ChartSensor />);
-        break;
-      case "/all-sensor":
-        setActiveContent(<AllSensor />);
-        break;
-      case "/all-asset":
-        setActiveContent(<AllAsset />);
-        break;
-      case "/organization":
-        setActiveContent(<EditOrganization />);
-        break;
-      case "/profile":
-        setActiveContent(<ProfilePage />);
-        break;
-      default:
-        setActiveContent(null);
-        break;
-    }
-  };
-
-  const getRouteName = (path) => {
-    const route = routes.find((route) => route.path === path);
-    return route ? route.name : "";
-  };
+  const currentMenuItem = menuItems.find(
+    (item) => item.path === location.pathname
+  );
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -67,7 +60,7 @@ const PermanentDrawerLeft = ({ routes }) => {
       >
         <Toolbar>
           <Typography variant="h6" noWrap component="div">
-            {getRouteName(location.pathname)}
+            {currentMenuItem ? currentMenuItem.name : "Dashboard"}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -83,31 +76,42 @@ const PermanentDrawerLeft = ({ routes }) => {
         variant="permanent"
         anchor="left"
       >
-        <Toolbar />
-        <Divider />
+        <Box
+          sx={{
+            display: "flex",
+            p: 2,
+            justifyContent: "flex-start",
+          }}
+        >
+          <Box>
+            <Avatar alt="Mata Elang" src="/public/logo.jpeg" />
+          </Box>
+          <Box
+            sx={{
+              ml: 3,
+              my: 1,
+            }}
+          >
+            <Typography variant="h6">Mata Elang</Typography>
+          </Box>
+        </Box>
         <List>
-          {routes.map((route) => (
+          {menuItems.map((item) => (
             <ListItem
-              key={route.path}
+              key={item.path}
               button
               component={Link}
-              to={route.path}
-              exact
-              onClick={(event) => handleRouteSelect(event, route.path)}
+              to={item.path}
+              selected={item.path === location.pathname}
             >
-              <ListItemIcon>
-                <route.icon />
-              </ListItemIcon>
-              <ListItemText primary={route.name} />
+              <ListItemIcon>{<item.icon />}</ListItemIcon>
+              <ListItemText primary={item.name} />
             </ListItem>
           ))}
         </List>
       </Drawer>
-      <Box
-        component="main"
-        sx={{ flexGrow: 1, bgcolor: "background.default", p: 3 }}
-      >
-        {activeContent}
+      <Box component="main">
+        <Outlet />
       </Box>
     </Box>
   );

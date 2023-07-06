@@ -5,37 +5,42 @@ import {
   TextField,
   Button,
   Typography,
+  CardHeader,
+  Avatar,
 } from "@mui/material";
 import axios from "axios";
 import { useState } from "react";
 import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [dataLogin, setDataLogin] = useState({
     email: "",
     password: "",
   });
-
+  const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
   //   const [email, setEmail] = useState("");
   //   const [password, setPassword] = useState("");
   //   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const handleRegisterClick = () => {
+    history.push("/register");
+  };
+
   const postLogin = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:8001/api/users/login", dataLogin)
+      .post(`${urlGateway}/users/login`, dataLogin)
       .then(function (response) {
         console.log(response);
         if (response.status === 200) {
-          // Simpan access_token ke dalam cookie
           Cookies.set("access_token", response.data.access_token);
           Cookies.set("user_id", response.data.data.id);
+          Cookies.set("organization_id", response.data.data.organization[0].id);
 
-          // Lanjutkan ke halaman selanjutnya
           navigate("/dashboard");
         } else {
-          // Tampilkan pesan error
           console.log(response.data.message);
         }
       })
@@ -44,29 +49,19 @@ const LoginPage = () => {
       });
   };
 
-  //   const handleSubmit = (event) => {
-  // event.preventDefault          </Route>();
-
-  //     axios
-  //       .post("http://localhost:8001/api/users/login", { email, password })
-  //       .then((response) => {
-  //         // handle successful login here
-  //         console.log(response);
-  //       })
-  //       .catch((error) => {
-  //         setError("Invalid email or password.");
-  //         console.log(error);
-  //       });
-  //   };
-
   //   console.log(dataLogin);
   return (
     <div style={{ display: "flex", justifyContent: "center", marginTop: 50 }}>
       <Card style={{ width: 400 }}>
+        <CardHeader
+          avatar={<Avatar src="/logo.jpeg" sx={{ width: 64, height: 64 }} />}
+          title={
+            <Typography variant="h4" my="auto" mr={4}>
+              Mata Elang
+            </Typography>
+          }
+        />
         <CardContent>
-          <Typography variant="h5" component="h2" gutterBottom>
-            Login
-          </Typography>
           <form onSubmit={postLogin}>
             <TextField
               variant="outlined"
@@ -108,6 +103,13 @@ const LoginPage = () => {
               Login
             </Button>
           </form>
+          <Typography
+            variant="body2"
+            align="center"
+            style={{ marginTop: "16px" }}
+          >
+            Didnt Have Account? <Link to="/register">Click Here</Link>
+          </Typography>
         </CardContent>
       </Card>
     </div>

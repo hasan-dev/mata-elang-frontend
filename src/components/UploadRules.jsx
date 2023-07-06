@@ -7,14 +7,16 @@ import {
   Grid,
   Typography,
   Divider,
+  Modal,
 } from "@mui/material";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
-const UploadRules = () => {
+const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
+const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
+
+const UploadRules = ({ sensorId, handleCloseUpload }) => {
   const [selectedFile, setSelectedFile] = useState(null);
-  let { sensorId } = useParams();
-  console.log(sensorId);
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -25,13 +27,10 @@ const UploadRules = () => {
     formData.append("file", selectedFile);
 
     axios
-      .post(
-        `http://127.0.0.1:8002/api/sensors/update_rule/${sensorId}`,
-        formData
-      )
+      .post(`${urlSensor}/sensors/update_rule/${sensorId}`, formData)
       .then((response) => {
         console.log(response);
-        // Lakukan tindakan lain setelah upload berhasil
+        handleCloseUpload(sensorId);
       })
       .catch((error) => {
         console.error("Error uploading file:", error);
@@ -40,8 +39,19 @@ const UploadRules = () => {
   };
 
   return (
-    <Card>
-      <CardContent>
+    <Card
+      sx={{
+        maxWidth: 800,
+        mx: "auto",
+        my: 5,
+      }}
+    >
+      <CardContent
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <Typography variant="h4" align="center" gutterBottom>
           Upload Rules
         </Typography>
@@ -59,6 +69,7 @@ const UploadRules = () => {
         </Grid>
       </CardContent>
     </Card>
+    // </Modal>
   );
 };
 

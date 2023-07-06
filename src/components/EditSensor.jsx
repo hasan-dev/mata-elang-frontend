@@ -6,14 +6,34 @@ import {
   Divider,
   Typography,
   Link,
+  Modal,
 } from "@mui/material";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useNavigate, useParams } from "react-router-dom";
+import UploadRules from "./UploadRules";
 
-const EditSensor = () => {
-  let { sensorId } = useParams();
+const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
+const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
+
+const EditSensor = ({
+  sensorData,
+  sensorId,
+  handleClose,
+  editFlag,
+  setEditFlag,
+}) => {
+  // let { sensorId } = useParams();
+  const [openChildModal, setOpenChildModal] = useState(false);
+
+  const handleOpenChildModal = () => {
+    setOpenChildModal(true);
+  };
+
+  const handleCloseChildModal = () => {
+    setOpenChildModal(false);
+  };
   console.log(sensorId);
 
   const [dataSensor, setDataSensor] = useState({
@@ -50,18 +70,17 @@ const EditSensor = () => {
     };
 
     axios
-      .patch(
-        `http://127.0.0.1:8001/api/sensors/update/${sensorId}`,
-        dataSensorSubmit,
-        {
-          headers: {
-            Authorization: "Bearer " + accessToken,
-          },
-        }
-      )
+      .patch(`${urlGateway}/sensors/update/${sensorId}`, dataSensorSubmit, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
+        },
+      })
       .then(function (response) {
-        console.log(response.status, response.data);
-        navigate("/all-sensor");
+        console.log(response.data);
+        if (response.data.message === "updated") {
+          setEditFlag(!editFlag);
+          handleClose(sensorId);
+        }
       })
       .catch(function (error) {
         console.log(error);
@@ -70,7 +89,7 @@ const EditSensor = () => {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8001/api/sensors/${sensorId}`, {
+      .get(`${urlGateway}/sensors/${sensorId}`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
@@ -92,12 +111,34 @@ const EditSensor = () => {
   }, [dataSensor]);
 
   return (
-    <Card>
-      <h1>Edit Sensor</h1>
+    <Card
+      sx={{
+        maxWidth: 800,
+        mx: "auto",
+        my: 8,
+      }}
+    >
+      <Typography
+        variant="h2"
+        align="center"
+        sx={{
+          marginTop: 2,
+        }}
+      >
+        Edit Sensor
+      </Typography>
       <Divider variant="middle" />
       <br />
       <CardContent>
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <TextField
             label="name"
             fullWidth
@@ -108,11 +149,12 @@ const EditSensor = () => {
             }}
           />
           <TextField
-            required
+            key={dataSensor.organization_id}
+            disabled={true}
             label="organization_id"
             fullWidth
             margin="normal"
-            value={dataSensor.organization_id}
+            value={dataSensor.organization_name}
             onChange={(event) => {
               setDataSensor({
                 ...dataSensor,
@@ -183,25 +225,35 @@ const EditSensor = () => {
               });
             }}
           />
-          <Button variant="contained" color="primary" type="submit">
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            sx={{
+              marginTop: 2,
+            }}
+          >
             Submit
           </Button>
         </form>
-        <Typography
+        {/* <Typography
           variant="body2"
           align="center"
           style={{ marginTop: "16px" }}
         >
           Upload Rules?{" "}
-          <Link
-            component="button"
-            onClick={() => {
-              navigate(`/upload-rules/${sensorId}`);
-            }}
-          >
+          <Link component="button" onClick={handleOpenChildModal}>
             Click Here
           </Link>
-        </Typography>
+          <Modal
+            open={openChildModal}
+            onClose={handleCloseChildModal}
+            aria-labelledby="modal-child-title"
+            aria-describedby="modal-child-description"
+          >
+            <UploadRules />
+          </Modal>
+        </Typography> */}
       </CardContent>
     </Card>
   );

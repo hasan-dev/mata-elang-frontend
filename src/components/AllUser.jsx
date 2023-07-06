@@ -1,32 +1,30 @@
-import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
+import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import Button from "@mui/material/Button";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import Stack from "@mui/material/Stack";
 import {
   Box,
-  Card,
+  Button,
   Chip,
   Divider,
   Grid,
   Modal,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import Cookies from "js-cookie";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import CreateAsset from "./CreateAsset";
-import EditAsset from "./EditAsset";
+import Cookies from "js-cookie";
+import axios from "axios";
+import CreateUser from "./CreateUser";
+import EditUser from "./EditUser";
 import Swal from "sweetalert2";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -50,44 +48,43 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
-const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
-export default function AllAsset() {
-  const [assetData, setAssetData] = useState([]);
+export default function AllUser() {
+  const [userData, setuserData] = useState({});
   const accessToken = Cookies.get("access_token");
   const navigate = useNavigate();
   const userId = Cookies.get("user_id");
   const organizationId = Cookies.get("organization_id");
-  // const [organizationData, setOrganizationData] = useState([]);
+  const [organizationData, setOrganizationData] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoadingOrganization, setIsLoadingOrganization] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
   const [deletionFlag, setDeletionFlag] = useState(false);
-  const [editFlag, setEditFlag] = useState(false);
-  const [addFlag, setAddFlag] = useState(false);
   const [OrgId, setOrgId] = useState(0);
-  const [userData, setuserData] = useState({});
-  const [organizationData, setOrganizationData] = useState({});
+  const [openAdd, setOpenAdd] = useState(false);
+  const handleOpenAdd = () => setOpenAdd(true);
+  const handleCloseAdd = () => setOpenAdd(false);
+  // const [deletionFlag, setDeletionFlag] = useState(false);
+  const [myKey, setMyKey] = useState(0);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [createFlag, setCreateFlag] = useState(false);
+  const [editFlag, setEditFlag] = useState(false);
   const [permissions, setPermissions] = useState([]);
 
-  const handleOpenEdit = (assetId) => {
+  const handleOpenEdit = (userId) => {
     setOpenEdit((prevState) => ({
       ...prevState,
-      [assetId]: true,
+      [userId]: true,
     }));
   };
 
-  const handleCloseEdit = (assetId) => {
+  const handleCloseEdit = (userId) => {
     setOpenEdit((prevState) => ({
       ...prevState,
-      [assetId]: false,
+      [userId]: false,
     }));
   };
 
-  const handleDeleteAsset = (assetId) => {
+  const handleDeleteUser = (userId) => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -99,7 +96,7 @@ export default function AllAsset() {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .delete(`${urlGateway}/assets/delete/${assetId}`, {
+          .delete(`${urlGateway}/users/delete/${userId}`, {
             headers: {
               Authorization: "Bearer " + accessToken,
             },
@@ -117,15 +114,17 @@ export default function AllAsset() {
 
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_URL_API_GATEWAY}/users/${userId}`, {
+      .get(`${urlGateway}/users/${userId}`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
       })
       .then(function (response) {
-        setuserData(response.data.data);
+        console.log(response.data.data);
+        // setuserData(response.data.data);
         setOrganizationData(response.data.data.organization[0]);
         setPermissions(response.data.data.role[0].permissions);
+        // console.log(response.data.data.role[0].permissions);
       })
       .catch(function (error) {
         console.log(error);
@@ -134,21 +133,22 @@ export default function AllAsset() {
 
   useEffect(() => {
     axios
-      .get(`${urlGateway}/organizations/${organizationId}/assets/all`, {
+      .get(`${urlGateway}/organizations/${organizationId}/users/all`, {
         headers: {
           Authorization: "Bearer " + accessToken,
         },
       })
       .then(function (response) {
-        setAssetData(response.data.data);
+        setuserData(response.data.data);
       })
       .catch(function (error) {
         console.log(error);
       });
-  }, [deletionFlag, addFlag, editFlag]);
+  }, [deletionFlag, createFlag, editFlag]);
 
   return (
     <>
+      {console.log(permissions)}
       <Box
         sx={{
           display: "flex",
@@ -166,50 +166,62 @@ export default function AllAsset() {
         <Box
           sx={{
             p: 3,
-            display: "flex",
-            justifyContent: "space-between",
           }}
         >
-          <Box>
-            <Typography variant="h5">{organizationData.name} Asset</Typography>
+          {/* <Box display="flex" justifyContent="space-between">
+            <Button onClick={handleOpenAdd}>Add User</Button>
+            <Modal
+              open={openAdd}
+              onClose={handleCloseAdd}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <CreateUser
+                handleCloseAdd={handleCloseAdd}
+                organizationId={organizationId}
+              />
+            </Modal>
           </Box>
-
-          <Box>
+        </Box> */}
+          <Box display="flex" justifyContent="space-between">
+            {/* {console.log(organizationData)} */}
+            <Typography variant="h5">{organizationData.name} Users</Typography>
+            {/* {console.log(permissions)} */}
             {permissions &&
               permissions.map((permission) => {
-                if (permission.slug === "create-asset") {
+                if (permission.slug === "create-user") {
                   return (
                     <>
-                      <Button onClick={handleOpen}>Add Asset</Button>
+                      <Button onClick={handleOpenAdd}>Add User</Button>
                       <Modal
-                        open={open}
-                        onClose={handleClose}
+                        open={openAdd}
+                        onClose={handleCloseAdd}
                         aria-labelledby="modal-modal-title"
                         aria-describedby="modal-modal-description"
                       >
-                        <CreateAsset
+                        <CreateUser
+                          handleCloseAdd={handleCloseAdd}
                           organizationId={organizationId}
-                          handleClose={handleClose}
-                          addFlag={addFlag}
-                          setAddFlag={setAddFlag}
+                          createFlag={createFlag}
+                          setCreateFlag={setCreateFlag}
                         />
                       </Modal>
                     </>
                   );
                 }
               })}
-            {/* <Button onClick={handleOpen}>Add Asset</Button>
+            {/* <Button onClick={handleOpenAdd}>Add User</Button>
             <Modal
-              open={open}
-              onClose={handleClose}
+              open={openAdd}
+              onClose={handleCloseAdd}
               aria-labelledby="modal-modal-title"
               aria-describedby="modal-modal-description"
             >
-              <CreateAsset
+              <CreateUser
+                handleCloseAdd={handleCloseAdd}
                 organizationId={organizationId}
-                handleClose={handleClose}
-                addFlag={addFlag}
-                setAddFlag={setAddFlag}
+                createFlag={createFlag}
+                setCreateFlag={setCreateFlag}
               />
             </Modal> */}
           </Box>
@@ -219,8 +231,9 @@ export default function AllAsset() {
             px: 10,
           }}
         >
-          <Chip label="List of All Asset" />
+          <Chip label="List of All User" />
         </Divider>
+
         <Box
           sx={{
             p: 3,
@@ -240,45 +253,49 @@ export default function AllAsset() {
                 <TableRow>
                   <StyledTableCell>ID</StyledTableCell>
                   <StyledTableCell align="right">Name</StyledTableCell>
-                  <StyledTableCell align="right">Description</StyledTableCell>
-                  <StyledTableCell align="right">PIC</StyledTableCell>
-                  <StyledTableCell align="right">Sensor Name</StyledTableCell>
-                  <StyledTableCell align="center">
-                    Organization Name
-                  </StyledTableCell>
+                  <StyledTableCell align="right">Organization</StyledTableCell>
+                  <StyledTableCell align="right">Email</StyledTableCell>
+                  <StyledTableCell align="right">Role</StyledTableCell>
                   <StyledTableCell align="center">Action</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {assetData.map((row) => (
+                {Object.values(userData).map((row) => (
                   <StyledTableRow key={row.id}>
                     <StyledTableCell component="th" scope="row">
                       {row.id}
                     </StyledTableCell>
                     <StyledTableCell align="right">{row.name}</StyledTableCell>
                     <StyledTableCell align="right">
-                      {row.description}
+                      {row.organization[0].name}
                     </StyledTableCell>
+                    <StyledTableCell align="right">{row.email}</StyledTableCell>
                     <StyledTableCell align="right">
-                      {row.user_name}
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      {row.sensor_name}
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      {row.organization_name}
+                      {Array.isArray(row.role) &&
+                        row.role.map((role, index) => (
+                          <Typography
+                            key={role.id}
+                            component="span"
+                            display="inline"
+                          >
+                            {role.name}
+                            {index !== row.role.length - 1 && ", "}
+                          </Typography>
+                        ))}
+
+                      {/* {console.log(row.role)} */}
                     </StyledTableCell>
                     <Stack direction="row" spacing={2} p={2}>
                       {permissions &&
                         permissions.map((permission) => {
-                          if (permission.slug === "delete-asset") {
+                          if (permission.slug === "delete-user") {
                             return (
                               <Button
                                 key={row.id}
                                 variant="outlined"
                                 color="error"
                                 startIcon={<DeleteIcon />}
-                                onClick={() => handleDeleteAsset(row.id)}
+                                onClick={() => handleDeleteUser(row.id)}
                               >
                                 Delete
                               </Button>
@@ -289,16 +306,17 @@ export default function AllAsset() {
                         variant="outlined"
                         color="error"
                         startIcon={<DeleteIcon />}
-                        onClick={() => handleDeleteAsset(row.id)}
+                        onClick={() => handleDeleteUser(row.id)}
                       >
                         Delete
                       </Button> */}
                       {permissions &&
                         permissions.map((permission) => {
-                          if (permission.slug === "edit-asset") {
+                          if (permission.slug === "edit-user") {
                             return (
                               <>
                                 <Button
+                                  key={row.id}
                                   variant="contained"
                                   endIcon={<EditIcon />}
                                   onClick={() => handleOpenEdit(row.id)}
@@ -311,10 +329,10 @@ export default function AllAsset() {
                                   aria-labelledby="modal-modal-title"
                                   aria-describedby="modal-modal-description"
                                 >
-                                  <EditAsset
-                                    assetId={row.id}
-                                    organizationId={organizationId}
+                                  <EditUser
+                                    userId={row.id}
                                     handleCloseEdit={handleCloseEdit}
+                                    organizationId={organizationId}
                                     editFlag={editFlag}
                                     setEditFlag={setEditFlag}
                                   />
@@ -329,17 +347,17 @@ export default function AllAsset() {
                         onClick={() => handleOpenEdit(row.id)}
                       >
                         Edit
-                      </Button>
-                      <Modal
+                      </Button> */}
+                      {/* <Modal
                         open={openEdit[row.id] || false}
                         onClose={() => handleCloseEdit(row.id)}
                         aria-labelledby="modal-modal-title"
                         aria-describedby="modal-modal-description"
                       >
-                        <EditAsset
-                          assetId={row.id}
-                          organizationId={organizationId}
+                        <EditUser
+                          userId={row.id}
                           handleCloseEdit={handleCloseEdit}
+                          organizationId={organizationId}
                           editFlag={editFlag}
                           setEditFlag={setEditFlag}
                         />
