@@ -11,28 +11,28 @@ import {
   Stack,
   Chip,
   MenuItem,
-} from "@mui/material";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
-import CancelIcon from "@mui/icons-material/Cancel";
+} from '@mui/material';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
 
 const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
   const [dataAsset, setDataAsset] = useState({
-    name: "",
-    location: "",
-    as_number: "",
-    dns: "",
-    organization_id: "",
-    sensor_id: "",
-    pic: "",
-    description: "",
+    name: '',
+    location: '',
+    as_number: '',
+    dns: '',
+    organization_id: '',
+    sensor_id: '',
+    pic: '',
+    description: '',
   });
 
-  const accessToken = Cookies.get("access_token");
+  const accessToken = Cookies.get('access_token');
   // const organizationId = Cookies.get("organization_id");
   const [sensorData, setSensorData] = useState([]);
   const [selectedSensor, setSelectedSensor] = useState([]);
@@ -55,14 +55,14 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
 
     console.log(dataAssetSubmit);
     axios
-      .post(`${urlGateway}/assets/register`, dataAssetSubmit, {
+      .post(`http://127.0.0.1:8004/api/assets/register`, dataAssetSubmit, {
         headers: {
-          Authorization: "Bearer " + accessToken,
+          Authorization: 'Bearer ' + accessToken,
         },
       })
       .then(function (response) {
         console.log(response.data);
-        if (response.data.message === "registered") {
+        if (response.data.message === 'registered') {
           setAddFlag(!addFlag);
           handleClose();
         }
@@ -76,7 +76,7 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
     axios
       .get(`${urlGateway}/organizations/${organizationId}/sensors/all`, {
         headers: {
-          Authorization: "Bearer " + accessToken,
+          Authorization: 'Bearer ' + accessToken,
         },
       })
       .then(function (response) {
@@ -92,7 +92,7 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
     axios
       .get(`${urlGateway}/organizations/${organizationId}/users/all`, {
         headers: {
-          Authorization: "Bearer " + accessToken,
+          Authorization: 'Bearer ' + accessToken,
         },
       })
       .then(function (response) {
@@ -109,35 +109,35 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
       <Card
         sx={{
           maxWidth: 800,
-          mx: "auto",
+          mx: 'auto',
           my: 8,
         }}
       >
         <Typography
-          variant="h2"
-          align="center"
+          variant='h2'
+          align='center'
           sx={{
             marginTop: 2,
           }}
         >
           Create Asset
         </Typography>
-        <Divider variant="middle" />
+        <Divider variant='middle' />
         <br />
         <CardContent>
           <form
             onSubmit={handleSubmit}
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
             <TextField
-              label="name"
+              label='name'
               fullWidth
-              margin="normal"
+              margin='normal'
               value={dataAsset.name}
               onChange={(event) => {
                 setDataAsset({
@@ -147,9 +147,9 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
               }}
             />
             <TextField
-              label="description"
+              label='description'
               fullWidth
-              margin="normal"
+              margin='normal'
               value={dataAsset.description}
               onChange={(event) => {
                 setDataAsset({
@@ -159,9 +159,9 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
               }}
             />
             <TextField
-              label="dns"
+              label='dns'
               fullWidth
-              margin="normal"
+              margin='normal'
               value={dataAsset.dns}
               onChange={(event) => {
                 setDataAsset({
@@ -171,9 +171,9 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
               }}
             />
             <TextField
-              label="as_number"
+              label='as_number'
               fullWidth
-              margin="normal"
+              margin='normal'
               value={dataAsset.as_number}
               onChange={(event) => {
                 setDataAsset({
@@ -183,9 +183,9 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
               }}
             />
             <TextField
-              label="location"
+              label='location'
               fullWidth
-              margin="normal"
+              margin='normal'
               value={dataAsset.location}
               onChange={(event) => {
                 setDataAsset({
@@ -196,7 +196,7 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
             />
             <InputLabel
               sx={{
-                alignSelf: "flex-start",
+                alignSelf: 'flex-start',
               }}
             >
               Select User as PIC
@@ -206,9 +206,9 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
               fullWidth
               value={selectedUser}
               onChange={(e) => setSelectedUser(e.target.value)}
-              input={<OutlinedInput label="Select" />}
+              input={<OutlinedInput label='Select' />}
               renderValue={(selected) => (
-                <Stack gap={1} direction="row" flexWrap="wrap">
+                <Stack gap={1} direction='row' flexWrap='wrap'>
                   {selected.map((value) => (
                     <Chip
                       key={value}
@@ -236,7 +236,7 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
             </Select>
             <InputLabel
               sx={{
-                alignSelf: "flex-start",
+                alignSelf: 'flex-start',
               }}
             >
               Select One Sensor
@@ -246,9 +246,9 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
               fullWidth
               value={selectedSensor}
               onChange={(e) => setSelectedSensor(e.target.value)}
-              input={<OutlinedInput label="Select" />}
+              input={<OutlinedInput label='Select' />}
               renderValue={(selected) => (
-                <Stack gap={1} direction="row" flexWrap="wrap">
+                <Stack gap={1} direction='row' flexWrap='wrap'>
                   {selected.map((value) => (
                     <Chip
                       key={value}
@@ -277,9 +277,9 @@ const CreateAsset = ({ organizationId, addFlag, setAddFlag, handleClose }) => {
               ))}
             </Select>
             <Button
-              variant="contained"
-              color="primary"
-              type="submit"
+              variant='contained'
+              color='primary'
+              type='submit'
               sx={{
                 marginTop: 2,
               }}

@@ -1,37 +1,39 @@
-import { Box, Card, CardContent, CardHeader, Typography } from "@mui/material";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Box, Card, CardContent, CardHeader, Typography } from '@mui/material';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const urlGateway = import.meta.env.VITE_URL_API_GATEWAY;
 const urlSensor = import.meta.env.VITE_URL_API_SENSOR;
 
 export default function OrganizationDetail() {
   const [dataOrganization, setDataOrganization] = useState({
-    name: "",
-    email: "",
-    address: "",
-    province: "",
-    city: "",
-    phone_number: "",
-    oinkcode: "",
+    name: '',
+    email: '',
+    address: '',
+    province: '',
+    city: '',
+    phone_number: '',
+    oinkcode: '',
   });
-  const accessToken = Cookies.get("access_token");
-  const userId = Cookies.get("user_id");
+  const accessToken = Cookies.get('access_token');
+  const userId = Cookies.get('user_id');
+  const organizationId = Cookies.get('organization_id');
+  console.log('Value: ' + organizationId);
   const navigate = useNavigate();
 
   useEffect(() => {
     axios
       .get(`${urlGateway}/users/${userId}`, {
         headers: {
-          Authorization: "Bearer " + accessToken,
+          Authorization: 'Bearer ' + accessToken,
         },
       })
       .then(function (response) {
         console.log(response.data.data.organization[0]);
         if (!accessToken) {
-          navigate("/login");
+          navigate('/login');
         }
         setDataOrganization(response.data.data.organization[0]);
       })
@@ -44,14 +46,14 @@ export default function OrganizationDetail() {
     <>
       <Box
         sx={{
-          display: "flex",
-          bgcolor: "background.paper",
+          display: 'flex',
+          bgcolor: 'background.paper',
           border: 1,
-          borderColor: "grey.500",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignContent: "center",
-          borderRadius: "16px",
+          borderColor: 'grey.500',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignContent: 'center',
+          borderRadius: '16px',
           boxShadow: 3,
           mt: 10,
         }}
@@ -63,83 +65,83 @@ export default function OrganizationDetail() {
         >
           <Card
             sx={{
-              boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-              borderRadius: "8px",
-              overflow: "hidden",
+              boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+              borderRadius: '8px',
+              overflow: 'hidden',
             }}
           >
             <CardHeader
-              sx={{ textAlign: "center", backgroundColor: "#F5F5F5" }}
-              title="Organization"
+              sx={{ textAlign: 'center', backgroundColor: '#F5F5F5' }}
+              title='Organization'
             />
             <CardContent
               sx={{
-                display: "flex",
-                flexDirection: "row",
+                display: 'flex',
+                flexDirection: 'row',
                 p: 4,
               }}
             >
               <Box
                 key={dataOrganization.id}
                 sx={{
-                  marginBottom: "1.5rem",
+                  marginBottom: '1.5rem',
                   mx: 4,
-                  padding: "1.5rem",
-                  background: "linear-gradient(to bottom, #FFFFFF, #F5F5F5)",
-                  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-                  borderRadius: "8px",
+                  padding: '1.5rem',
+                  background: 'linear-gradient(to bottom, #FFFFFF, #F5F5F5)',
+                  boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+                  borderRadius: '8px',
                 }}
               >
-                <Typography variant="h6">{dataOrganization.name}</Typography>
-                <Box sx={{ marginTop: "1rem" }}>
+                <Typography variant='h6'>{dataOrganization.name}</Typography>
+                <Box sx={{ marginTop: '1rem' }}>
                   <Typography
-                    variant="subtitle1"
-                    sx={{ marginBottom: "0.5rem" }}
+                    variant='subtitle1'
+                    sx={{ marginBottom: '0.5rem' }}
                   >
                     Email:
                   </Typography>
                   <Typography>{dataOrganization.email}</Typography>
                 </Box>
-                <Box sx={{ marginTop: "1rem" }}>
+                <Box sx={{ marginTop: '1rem' }}>
                   <Typography
-                    variant="subtitle1"
-                    sx={{ marginBottom: "0.5rem" }}
+                    variant='subtitle1'
+                    sx={{ marginBottom: '0.5rem' }}
                   >
                     Address:
                   </Typography>
                   <Typography>{dataOrganization.address}</Typography>
                 </Box>
-                <Box sx={{ marginTop: "1rem" }}>
+                <Box sx={{ marginTop: '1rem' }}>
                   <Typography
-                    variant="subtitle1"
-                    sx={{ marginBottom: "0.5rem" }}
+                    variant='subtitle1'
+                    sx={{ marginBottom: '0.5rem' }}
                   >
                     Province:
                   </Typography>
                   <Typography>{dataOrganization.province}</Typography>
                 </Box>
-                <Box sx={{ marginTop: "1rem" }}>
+                <Box sx={{ marginTop: '1rem' }}>
                   <Typography
-                    variant="subtitle1"
-                    sx={{ marginBottom: "0.5rem" }}
+                    variant='subtitle1'
+                    sx={{ marginBottom: '0.5rem' }}
                   >
                     City:
                   </Typography>
                   <Typography>{dataOrganization.city}</Typography>
                 </Box>
-                <Box sx={{ marginTop: "1rem" }}>
+                <Box sx={{ marginTop: '1rem' }}>
                   <Typography
-                    variant="subtitle1"
-                    sx={{ marginBottom: "0.5rem" }}
+                    variant='subtitle1'
+                    sx={{ marginBottom: '0.5rem' }}
                   >
                     Phone Number:
                   </Typography>
                   <Typography>{dataOrganization.phone_number}</Typography>
                 </Box>
-                <Box sx={{ marginTop: "1rem" }}>
+                <Box sx={{ marginTop: '1rem' }}>
                   <Typography
-                    variant="subtitle1"
-                    sx={{ marginBottom: "0.5rem" }}
+                    variant='subtitle1'
+                    sx={{ marginBottom: '0.5rem' }}
                   >
                     Website:
                   </Typography>
