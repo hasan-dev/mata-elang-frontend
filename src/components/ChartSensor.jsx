@@ -33,7 +33,13 @@ import DataGridPriority from './DataGridPriority.jsx';
 import DataGridAlertMsg from './DataGridAlertMsg.jsx';
 import GaugeChart from './GaugeChart.jsx';
 import BarChartDistributeAttack from './BarChartDistributeAttack.jsx';
+import DistributtionOfAttack from './DistributtionOfAttack.jsx';
+import MUIPieChart from './MUIPieChart.jsx';
 import Map from './Map.jsx';
+import LineChartAttack from './LineChartAttack.jsx';
+import MapSourceAttack from './MapSourceAttack.jsx';
+import MapDestinationAttack from './MapDestinationAttack.jsx';
+import DateFilter from './DateFilter.jsx';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -140,63 +146,92 @@ const ChartSensor = () => {
     setData(filteredData);
   }, [sensorCounts]);
 
+  const [dateRange, setDateRange] = useState({
+    start: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
+    end: new Date().toISOString(),
+  });
+
+  const handleDateFilter = (newRange) => {
+    setDateRange(newRange);
+  };
+
   return (
     <>
       <div style={{ paddingTop: 50 }}>
-        <Box
-          sx={{
-            display: 'grid',
-            columnGap: 2,
-            rowGap: 1,
-            gridTemplateColumns: '1fr 1fr',
-            alignItems: 'stretch',
-          }}
-        >
-          <Box sx={{ gridColumn: '1 / span 1' }}>
-            <GaugeChart />;
+        <DateFilter onApply={handleDateFilter} />
+        <div style={{ paddingTop: '50px' }}>
+          <Box
+            sx={{
+              display: 'grid',
+              columnGap: 2,
+              rowGap: 1,
+              gridTemplateColumns: '1fr 1fr',
+              alignItems: 'stretch',
+            }}
+          >
+            <Box sx={{ gridColumn: '1 / span 1' }}>
+              <GaugeChart startDate={dateRange.start} endDate={dateRange.end} />
+            </Box>
+            <Box sx={{ gridColumn: '2 / span 1' }}>
+              <BarChartSensorId
+                startDate={dateRange.start}
+                endDate={dateRange.end}
+              />
+            </Box>
           </Box>
-          <Box sx={{ gridColumn: '2 / span 1' }}>
-            <BarChartSensorId />;
-          </Box>
-        </Box>
+        </div>
       </div>
-
-      {/* <div style={{ paddingTop: '50px' }}>
-        <div style={{ fontSize: '20px' }}>Distribution Attack</div>
-        <BarChartDistributeAttack />
-      </div> */}
       <div style={{ paddingTop: '50px' }}>
-        <BarChartProtocol />
+        <BarChartProtocol startDate={dateRange.start} endDate={dateRange.end} />
       </div>
       <div style={{ paddingTop: '50px' }}>
         <div style={{ fontSize: '20px' }}>Top 10 Classification</div>
-        <DataGridClassification />
+        <DataGridClassification
+          startDate={dateRange.start}
+          endDate={dateRange.end}
+        />
       </div>
       <div style={{ paddingTop: '50px' }}>
         <div style={{ fontSize: '20px' }}>Top 10 Priority</div>
-        <DataGridPriority />
-      </div>
-      <div style={{ paddingTop: '50px' }}>
-        <div style={{ fontSize: '20px' }}>Top 10 Source IP Address</div>
-        <DataGridSrcIP />
+        <DataGridPriority startDate={dateRange.start} endDate={dateRange.end} />
       </div>
       <div style={{ paddingTop: '50px' }}>
         <div style={{ fontSize: '20px' }}>Top 10 Destination IP Address</div>
-        <DataGridDstIP />
+        <DataGridDstIP startDate={dateRange.start} endDate={dateRange.end} />
       </div>
       <div style={{ paddingTop: '50px' }}>
         <div style={{ fontSize: '20px' }}>Top 20 Event Signature</div>
-        <DataGridAlertMsg />
+        <DataGridAlertMsg startDate={dateRange.start} endDate={dateRange.end} />
+      </div>
+      <div style={{ paddingTop: '50px' }}>
+        <MUIPieChart startDate={dateRange.start} endDate={dateRange.end} />
+      </div>
+      <div style={{ paddingTop: '50px' }}>
+        <DistributtionOfAttack
+          startDate={dateRange.start}
+          endDate={dateRange.end}
+        />
+      </div>
+      {/* <div style={{ paddingTop: '50px' }}>
+        <LineChartAttack />
+      </div> */}
+      <div style={{ paddingTop: '50px' }}>
+        <MapSourceAttack startDate={dateRange.start} endDate={dateRange.end} />
+      </div>
+      <div style={{ paddingTop: '50px' }}>
+        <MapDestinationAttack
+          startDate={dateRange.start}
+          endDate={dateRange.end}
+        />
       </div>
       {/* <div style={{ paddingTop: '50px' }}>
         <div style={{ fontSize: '20px' }}>Top Source IP Address</div>
         <CustomLineChart />
-      </div>
-      <div style={{ paddingTop: '50px' }}>
+      </div> */}
+      {/* <div style={{ paddingTop: '50px' }}>
         <div style={{ fontSize: '20px' }}>Top Destination Country</div>
         <Map />
       </div> */}
-
       <Box
         sx={{
           display: 'flex',

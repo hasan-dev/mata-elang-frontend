@@ -5,7 +5,7 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const GaugeChart = () => {
+const GaugeChart = ({ startDate, endDate }) => {
   const [totalDataSources, setTotalDataSources] = useState(0);
   const accessToken = Cookies.get('access_token');
 
@@ -16,13 +16,25 @@ const GaugeChart = () => {
         headers: {
           Authorization: 'Bearer ' + accessToken,
         },
+        params: {
+          start: startDate,
+          end: endDate,
+        },
       })
       .then((response) => {
+        // Filter the data based on the date range
+        const filteredData = response.data.filter((item) => {
+          const timestamp = new Date(item._source['@timestamp']);
+          return (
+            timestamp >= new Date(startDate) && timestamp <= new Date(endDate)
+          );
+        });
+
         // Set the total number of data sources
-        setTotalDataSources(response.data.length);
+        setTotalDataSources(filteredData.length);
       })
       .catch((error) => console.error('Error fetching data:', error));
-  }, []);
+  }, [startDate, endDate, accessToken]);
 
   return (
     <div>
@@ -41,11 +53,12 @@ const GaugeChart = () => {
             color='text.secondary'
             gutterBottom
           >
-            Total number of attack
+            Total number of attacks
           </Typography>
         </Box>
         <Gauge
           value={totalDataSources}
+          max={10000} // Set max value to 10000
           startAngle={-110}
           endAngle={110}
           height={240}
@@ -55,7 +68,8 @@ const GaugeChart = () => {
               transform: 'translate(0px, 0px)',
             },
           }}
-          text={({ value, valueMax }) => `${value} / ${valueMax || 100}`}
+          // Properly scale the text to the max value
+          text={({ value }) => `${value} / 100`}
         />
       </Card>
     </div>
